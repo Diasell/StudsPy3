@@ -102,6 +102,13 @@ class ProfileModel(models.Model):
         null=True
     )
 
+    room = models.CharField(
+        blank=True,
+        null=True,
+        max_length=10,
+        verbose_name=u'Room'
+    )
+
     def __unicode__(self):
         if self.is_student:
             return u"Student: %s" % self.user.get_full_name()
