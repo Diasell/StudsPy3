@@ -16,7 +16,7 @@ Including another URLconf
 from .settings import MEDIA_ROOT, DEBUG
 from django.conf.urls import url, include, patterns
 from django.contrib import admin
-from .routers import router, bot_router, auth_router
+from .routers import router, bot_router, auth_router, schedule_router
 
 
 urlpatterns = [
@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^api/v1/', include(router.urls)),
     url(r'^telegram/', include(bot_router.urls)),
     url(r'^auth/', include(auth_router.urls)),
+    url(r'^schedule/', include(schedule_router.urls)),
     url(r'^docs/', include('rest_framework_docs.urls')),
 
 ]

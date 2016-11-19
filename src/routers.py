@@ -1,6 +1,7 @@
 from django.conf.urls import url
 from mainapp.utils.custom_router import HybridRouter
 from mainapp.api import apiv1_methods as apiv1
+from mainapp.api import schedule
 from mainapp.api import auth
 from mainapp.telegram import methods as tel_bot
 
@@ -8,17 +9,9 @@ from mainapp.telegram import methods as tel_bot
 router = HybridRouter()
 bot_router = HybridRouter()
 auth_router = HybridRouter()
+schedule_router = HybridRouter()
 
 # APIViews:
-router.add_api_view("User Schedule for Today",
-                    url(r'^get_user_schedule/$', apiv1.TodayScheduleView.as_view()))
-
-router.add_api_view("User Schedule for current week",
-                    url(r'^get_user_weekly_schedule/$', apiv1.WeeklyScheduleView.as_view()))
-
-router.add_api_view("User Schedule for NEXT week",
-                    url(r'^get_user_next_week_schedule/$', apiv1.NextWeeklyScheduleView.as_view()))
-
 router.add_api_view("Show all the students for the given group",
                     url(r'^get_students_group_list/$', apiv1.GroupStudentListView.as_view()))
 
@@ -51,3 +44,13 @@ auth_router.add_api_view("User REGISTRATION",
 
 auth_router.add_api_view("Edit Profile",
                          url(r'^editprofile/$', auth.EditProfileView.as_view()))
+
+# SCHEDULE
+schedule_router.add_api_view("User Schedule for Today",
+                             url(r'^today/$', schedule.TodayScheduleView.as_view()))
+
+schedule_router.add_api_view("User Schedule for current week",
+                             url(r'^weekly/$', schedule.WeeklyScheduleView.as_view()))
+
+schedule_router.add_api_view("User Schedule for NEXT week",
+                             url(r'^next_week/$', schedule.NextWeeklyScheduleView.as_view()))
