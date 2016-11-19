@@ -61,12 +61,8 @@ class LoginAPIView(APIView):
                 result['Authorization'] = "Token %s" % token
                 return Response(result, status=status.HTTP_200_OK)
         else:
-            return Response({
-                'status': 'Unauthorized',
-                'message': 'Username/password combination is invalid'
-                },
-                status=status.HTTP_401_UNAUTHORIZED
-            )
+            return Response({'message': 'Невірний номер телефону чи пароль'},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
 
 class RegisterAPIView(APIView):
