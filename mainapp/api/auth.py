@@ -187,22 +187,34 @@ class EditProfileView(APIView):
         user = request.user
         data = request.data
 
-        if data['username']:
-            user.username = data['username']
-        if data['first_name']:
-            user.first_name = data['first_name']
-        if data['last_name']:
-            user.last_name = data['last_name']
-        if data['password']:
-            user.set_password(data['password'])
-        if data['birthday']:
-            user.profilemodel.birthday = data['birthday']
-        user.save()
-        user.profilemodel.save()
+        if user.is_active:
 
-        return Response({
-            'status': 'Unauthorized',
-            'message': 'Provided data is invalid'
-        },
-            status=status.HTTP_200_OK
-        )
+            if len(request.FILES) != 0:
+                user.profilemodel.photo = request.FILES['photo']
+            if data['first_name']:
+                user.first_name = data['first_name']
+            if data['last_name']:
+                user.last_name = data['last_name']
+            if data['middle_name']:
+                user.profilemodel.middle_name = data['middle_name']
+            if data['password']:
+                user.set_password(data['password'])
+            if data['birthday']:
+                user.profilemodel.birthday = data['birthday']
+            if data['contact_phone']:
+                user.profilemodel.contact_phone =data['contact_phone']
+
+            user.save()
+            user.profilemodel.save()
+            profile = ProfileSerializer(user.profilemodel).data
+            result = dict()
+            for key in profile:
+                result[key] = profile[key]
+            return Response(result, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'status': 'Unauthorized',
+                'message': 'Provided data is invalid'
+            },
+                status=status.HTTP_403_FORBIDDEN
+            )
