@@ -63,24 +63,17 @@ class LoginAPIView(APIView):
             if account.is_active:
                 token = Token.objects.get_or_create(user=account)[0]
                 user = User.objects.get(username=username)
-                profile = ProfileModel.objects.get(user=user)
-                response = dict()
-                response['Authorization'] = "Token %s" % token
-                response['full_name'] = user.get_full_name()
-                response['email'] = user.email
-                photo = ProfileSerializer(profile).data['photo']
-                response['photo'] = photo
-                response['group'] = profile.student_group.title
-                response['faculty'] = profile.faculty.title
-                return Response(
-                    response,
-                    status=status.HTTP_200_OK
-                )
+                profile = ProfileSerializer(user.profilemodel).data
+                result = dict()
+                for key in profile:
+                    result[key] = profile[key]
+                result['Authorization'] = "Token %s" % token
+                return Response(result, status=status.HTTP_200_OK)
         else:
             return Response({
                 'status': 'Unauthorized',
                 'message': 'Username/password combination is invalid'
-                },
+            },
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
