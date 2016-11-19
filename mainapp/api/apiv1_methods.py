@@ -458,18 +458,33 @@ class ListOfDisciplinesView(APIView):
                 semesterstart__lt=todaysdate,
                 semesterend__gt=todaysdate
             )
-            student_group = ProfileModel.objects.get(
-                user=user
-            ).student_group
+            student_group = user.profilemodel.student_group
 
             disciplines = Para.objects.filter(
                 semester=current_semester,
                 para_group=student_group
             ).values_list('para_subject__discipline', flat=True).distinct()
-            result = dict()
-            for number, discipline in enumerate(disciplines):
-                result[number + 1] = discipline
-            return Response(result, status=status.HTTP_200_OK)
+            items = list(disciplines)
+            items = sorted(items)
+            response = []
+
+            for discipline in items:
+                result = dict()
+                result['para'] = discipline
+                para = Para.objects.filter(
+                    semester=current_semester,
+                    para_group=student_group,
+                    para_subject__discipline=discipline
+                )[0]
+                result['professor'] = para.para_professor.user.get_full_name()
+                result['room'] = para.para_professor.room
+                try:
+                    result['photo'] = para.para_professor.photo.url
+                except ValueError:
+                    result['photo'] = ''
+                response.append(result)
+
+            return Response(response, status=status.HTTP_200_OK)
         else:
             return Response({"Authorization": "This is not an active user"},
                             status=status.HTTP_401_UNAUTHORIZED)
