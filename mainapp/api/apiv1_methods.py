@@ -256,8 +256,8 @@ class WeeklyScheduleView(views.APIView):
                 semesterstart__lt=todaysdate,
                 semesterend__gt=todaysdate
             )
-            if ProfileModel.objects.get(user=user).is_student:
-                student_group = ProfileModel.objects.get(user=user).student_group
+            if user.profilemodel.is_student:
+                student_group = user.profilemodel.student_group
 
                 for day in range(0, 5):
                     classes = Para.objects.filter(
@@ -275,10 +275,10 @@ class WeeklyScheduleView(views.APIView):
 
                 return Response(result, status=status.HTTP_200_OK)
 
-            elif ProfileModel.objects.get(user=user).is_professor:
+            elif ProfileModel.profilemodel.is_professor:
                 for day in range(0, 5):
                     classes = Para.objects.filter(
-                        para_professor=ProfileModel.objects.get(user=user),
+                        para_professor=user.profilemodel,
                         para_day__dayoftheweeknumber=day,
                         week_type=weektype,
                         semester=current_semester
