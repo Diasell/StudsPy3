@@ -610,7 +610,7 @@ class GroupsListView(APIView):
             )
             groups = Para.objects.filter(
                 semester=current_semester,
-                para_professor=ProfileModel.objects.get(user=user)
+                para_professor=user.profilemodel
             ).values_list('para_group__title', flat=True).distinct()
             result = dict()
             for number, group in enumerate(groups):
