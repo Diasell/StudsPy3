@@ -70,6 +70,18 @@ class EditProfileViewSerializer(serializers.ModelSerializer):
         )
 
 
+class AddChatIDSerializer(serializers.ModelSerializer):
+    """
+    Serializer for DRF DOCS for Add Chat ID Endpoint
+    """
+    chat_id = serializers.CharField(source='user_profilemodel.chat_id')
+    class Meta:
+        model = Token
+        fields = (
+            'chat_id',
+        )
+
+
 class LoginViewSerializer(serializers.ModelSerializer):
     """
         Serializer for DRF DOCS for Login EndPoint

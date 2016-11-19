@@ -102,6 +102,11 @@ class ProfileModel(models.Model):
         null=True
     )
 
+    is_verified = models.BooleanField(
+        default=False,
+        verbose_name=u"Аккакунт підтверджений"
+    )
+
     room = models.CharField(
         max_length=10,
         blank=True,

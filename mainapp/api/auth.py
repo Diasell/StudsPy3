@@ -23,7 +23,8 @@ from mainapp.serializers.serializer import (
 from mainapp.serializers.docs_serializer import (
     RegisterViewSerializer,
     LoginViewSerializer,
-    EditProfileViewSerializer)
+    EditProfileViewSerializer,
+    AddChatIDSerializer)
 
 # import needed app models
 from mainapp.models.userProfile import ProfileModel
@@ -175,6 +176,28 @@ class RegisterAPIView(APIView):
                 },
                 status=status.HTTP_403_FORBIDDEN
             )
+
+
+class AddChatIdView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = AddChatIDSerializer
+
+    def post(self, request):
+        user = request.user
+        input_chat_id = request.data['chat_id']
+
+        if user.is_active and not user.is_verified:
+            if input_chat_id == user.profilemodel.chat_id:
+                user.profilemodel.is_verified = True
+                user.profilemodel.save()
+                user.save()
+                return Response({'status':'success'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'status':'Invalid Chat ID'}, status=status.HTTP_403_FORBIDDEN)
+
+        else:
+            return Response({'status':'Invalid Token'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class EditProfileView(APIView):

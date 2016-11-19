@@ -76,12 +76,30 @@ def get_schedule(chat_id):
         a['text'] = result
         return a
 
+def add_chat_id(chat_id, phone_number):
+    user = User.objects.filter(username=phone_number)[0]
+
+    if user:
+        if not user.profilemodel.is_verified:
+            user.profilemodel.chat_id = chat_id
+            user.profilemodel.save()
+            user.save()
+            response = 'Ваш код для реєстрації: %' % chat_id
+        else:
+            response = 'Введений вами номер прикріплений до іншого аккаунта'
+    else:
+        response = 'Аккаунта з таким номером телефону немає. Будь ласка перевірте номер'
+
+    return response
+
 
 def help(chat_id):
     a = {}
     a["chat_id"] = chat_id
     a['text'] = "commands:\n/schedule" + '\n' + 'chat_id: ' + str(chat_id)
     return a
+
+
 class TelegramBotView(APIView):
     permission_classes = (AllowAny, )
 
@@ -102,6 +120,9 @@ class TelegramBotView(APIView):
         if func:
             req = requests.post(TELEGRAM, func(chat_id))
         else:
-            req = requests.post(TELEGRAM, help(chat_id))
+            if user_command[0:3]=='380' and len(user_command)==12:
+                req = request.post(TELEGRAM, add_chat_id(chat_id, user_command))
+            else:
+                req = requests.post(TELEGRAM, help(chat_id))
 
         return Response(req.json(), status=req.status_code)

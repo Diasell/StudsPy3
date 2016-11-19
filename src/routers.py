@@ -44,6 +44,8 @@ auth_router.add_api_view("User REGISTRATION",
 
 auth_router.add_api_view("Edit Profile",
                          url(r'^editprofile/$', auth.EditProfileView.as_view()))
+auth_router.add_api_view("Add Chat ID to verify user account",
+                         url(r'add_chat_id/$', auth.AddChatIdView.as_view()))
 
 # SCHEDULE
 schedule_router.add_api_view("User Schedule for Today",
