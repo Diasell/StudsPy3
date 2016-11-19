@@ -11,8 +11,8 @@ def group_year(date_started):
     :return: str that represents the course for the group
     """
     today = datetime.date.today()
-    course = ((today - date_started).days / 365) + 1
-    return u"%s course" % course
+    course = int(((today - date_started).days / 365) + 1)
+    return str(course) + u"-й курс"
 
 
 def for_ios_format(response):
