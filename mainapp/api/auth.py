@@ -22,7 +22,8 @@ from mainapp.serializers.serializer import (
 # import cropped serializers for docs page
 from mainapp.serializers.docs_serializer import (
     RegisterViewSerializer,
-    LoginViewSerializer)
+    LoginViewSerializer,
+    EditProfileViewSerializer)
 
 # import needed app models
 from mainapp.models.userProfile import ProfileModel
@@ -88,7 +89,6 @@ class RegisterAPIView(APIView):
         faculty = request.data['faculty']
         email = request.data['email']
         photo = request.FILES['photo']
-
 
         faculty = FacultyModel.objects.filter(title=faculty)
         user_group = StudentGroupModel.objects.filter(
@@ -176,3 +176,33 @@ class RegisterAPIView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
+
+class EditProfileView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    parser_classes = (MultiPartParser, JSONParser)
+    serializer_class = EditProfileViewSerializer
+
+    def put(self, request):
+        user = request.user
+        data = request.data
+
+        if data['username']:
+            user.username = data['username']
+        if data['first_name']:
+            user.first_name = data['first_name']
+        if data['last_name']:
+            user.last_name = data['last_name']
+        if data['password']:
+            user.set_password(data['password'])
+        if data['birthday']:
+            user.profilemodel.birthday = data['birthday']
+        user.save()
+        user.profilemodel.save()
+
+        return Response({
+            'status': 'Unauthorized',
+            'message': 'Provided data is invalid'
+        },
+            status=status.HTTP_200_OK
+        )

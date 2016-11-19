@@ -37,6 +37,39 @@ class RegisterViewSerializer(serializers.ModelSerializer):
         )
 
 
+class EditProfileViewSerializer(serializers.ModelSerializer):
+    """
+    Serializer for DRF DOCS for EditProfile EndPoint
+    """
+    username = serializers.CharField(source='user.username')
+    password = serializers.CharField(source='user.password')
+    confirm_password = serializers.CharField(source='user.password')
+    email = serializers.EmailField(source='user.email')
+    last_name = serializers.CharField(source='user.last_name')
+    first_name = serializers.CharField(source='user.first_name')
+    faculty = serializers.CharField(source='faculty.title')
+    group_title = serializers.CharField(source='student_group.title')
+    group_started = serializers.CharField(source='student_group.started_date')
+
+    class Meta:
+        model = ProfileModel
+        fields = (
+            'username',
+            'email',
+            'last_name',
+            'first_name',
+            'password',
+            'confirm_password',
+            'faculty',
+            'department',
+            'contact_phone',
+            'group_title',
+            'group_started',
+            'birthday',
+            'photo',
+        )
+
+
 class LoginViewSerializer(serializers.ModelSerializer):
     """
         Serializer for DRF DOCS for Login EndPoint
