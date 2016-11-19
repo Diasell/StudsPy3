@@ -98,12 +98,8 @@ class RegisterAPIView(APIView):
         group_started = request.data['group_started']
         faculty = request.data['faculty']
         email = request.data['email']
+        photo = request.FILES['photo']
 
-        if len(request.FILES) != 0:
-            photo_flag = True
-            photo = request.FILES['photo']
-        else:
-            photo_flag = False
 
         faculty = FacultyModel.objects.filter(title=faculty)
         user_group = StudentGroupModel.objects.filter(
@@ -111,27 +107,28 @@ class RegisterAPIView(APIView):
             date_started=group_started
         )
         # validation user input
-        if photo_flag:
-            if photo.size > (2048*1024):
-                return Response(
-                    {'Failed': 'image size is greater than 2MB'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
-            try:
-                is_valid_image(photo)
-            except Exception:
-                return Response({
-                    'Failed': "attachment format is not supported"},
-                    status=status.HTTP_403_FORBIDDEN
-                )
+        if photo.size > (4096*1024):
+            return Response(
+                {'Failed': 'image size is greater than 4MB'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            is_valid_image(photo)
+        except Exception:
+            return Response(
+                {'Failed': "attachment format is not supported"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         if User.objects.filter(username=username):
-            return Response({
-                'Failed': "username is already taken"},
+            return Response(
+                {'Failed': "username is already taken"},
                 status=status.HTTP_403_FORBIDDEN
             )
         if User.objects.filter(email=email):
-            return Response({
-                'Failed': "email is already taken"},
+            return Response(
+                {'Failed': "email is already taken"},
                 status=status.HTTP_403_FORBIDDEN
             )
         if password != c_password:
@@ -149,6 +146,7 @@ class RegisterAPIView(APIView):
                 'Failed': "user group is not valid"},
                 status=status.HTTP_403_FORBIDDEN
             )
+
         serialized = UserSerializer(data=request.data).is_valid()
 
         if serialized:
@@ -160,42 +158,27 @@ class RegisterAPIView(APIView):
                     email=email
                 )
                 new_user.save()
-                if photo_flag:
-                    new_user_profile = ProfileModel(
-                        user=new_user,
-                        is_student=True,
-                        student_group=user_group[0],
-                        faculty=faculty[0],
-                        started_date=group_started,
-                        birthday=birthday,
-                        photo=photo
-                    )
-                else:
-                    new_user_profile = ProfileModel(
-                        user=new_user,
-                        is_student=True,
-                        student_group=user_group[0],
-                        faculty=faculty[0],
-                        started_date=group_started,
-                        birthday=birthday
-                    )
+
+                new_user_profile = ProfileModel(
+                    user=new_user,
+                    is_student=True,
+                    student_group=user_group[0],
+                    faculty=faculty[0],
+                    started_date=group_started,
+                    birthday=birthday,
+                    photo=photo
+                )
                 new_user_profile.save()
 
                 token = Token.objects.get_or_create(user=new_user)[0]
-
+                profile = ProfileSerializer(new_user_profile).data
                 response = dict()
+                for key in profile:
+                    response[key] = profile[key]
                 response['Authorization'] = "Token %s" % token
                 response['full_name'] = new_user.get_full_name()
-                response['email'] = new_user.email
-                response['group'] = new_user_profile.student_group.title
-                response['faculty'] = new_user_profile.faculty.title
-                if photo_flag:
-                    response['photo'] = photo
 
-                return Response(
-                    response,
-                    status=status.HTTP_201_CREATED
-                )
+                return Response(response, status=status.HTTP_201_CREATED)
         else:
             return Response({
                 'status': 'Unauthorized',
