@@ -4,16 +4,15 @@ from django.contrib.auth.models import User
 
 from .models.student import StudentJournalModel
 from .models.userProfile import ProfileModel
-from .models.helpermodels import StartSemester
+from .models.helpermodels import StartSemester, WorkingDay
 from .models.faculty import (
     DepartmentModel,
+    FacultyModel,
     StudentGroupModel,
     Disciplines,
     Para,
     ParaTime,
-    Rooms
-)
-
+    Rooms)
 
 
 class ProfileModelInline(admin.StackedInline):
@@ -104,6 +103,8 @@ admin.site.register(User, UserAdmin)
 admin.site.register(StudentJournalModel, StudentJournalModelAdmin)
 
 # Register your models here.
+admin.site.register(WorkingDay)
+admin.site.register(FacultyModel)
 admin.site.register(DepartmentModel, DepartmentModelAdmin)
 admin.site.register(StudentGroupModel, StudentGroupModelAdmin)
 admin.site.register(Disciplines, DisciplinesModelAdmin)
