@@ -209,8 +209,8 @@ class TodayScheduleView(views.APIView):
                 semesterstart__lt=todaysdate,
                 semesterend__gt=todaysdate
             )
-            if ProfileModel.objects.get(user=user).is_student:
-                student_group = ProfileModel.objects.get(user=user).student_group
+            if user.profilemodel.is_student:
+                student_group = user.profilemodel.student_group
 
                 classes_for_today = Para.objects.filter(
                     para_group=student_group,
@@ -222,9 +222,9 @@ class TodayScheduleView(views.APIView):
                 for i, para in enumerate(classes_for_today):
                     result["para_%s" % i] = ParaSerializer(para).data
                 return Response(result, status=status.HTTP_200_OK)
-            elif ProfileModel.objects.get(user=user).is_professor:
+            elif user.profilemodel.is_professor:
                 classes_for_today = Para.objects.filter(
-                    para_professor=ProfileModel.objects.get(user=user),
+                    para_professor=user.profilemodel,
                     para_day=today,
                     week_type=weektype
                 )
