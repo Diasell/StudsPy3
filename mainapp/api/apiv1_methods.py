@@ -357,22 +357,24 @@ class GroupStudentListView(views.APIView):
     """
     API endpoint to show all the students for the given group
     """
-    authentication_classes = (TokenAuthentication, )
-    permission_classes = (IsAuthenticated, )
-    serializer_class = GroupStudentsSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = AuthorizationSerializer
 
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         user = request.user
-        custom_logger(request.data, request.user)
         if user.is_active:
-            requested_group = self.request.data["group"]
-
+            requested_group = user.profilemodel.student_group
             list_of_students = ProfileModel.objects.filter(
-                student_group__title=requested_group
+                student_group=requested_group
             )
-            result = dict()
-            for number, student in enumerate(list_of_students):
-                result[number+1] = ProfileSerializer(student).data
+            result = []
+            for student in list_of_students:
+                stud_dict = dict()
+                temp = ProfileSerializer(student).data
+                for key in temp:
+                    stud_dict[key] = temp[key]
+                result.append(stud_dict)
             return Response(result, status=status.HTTP_200_OK)
         else:
             return Response({"UnAuth": "Current user is not active"},
