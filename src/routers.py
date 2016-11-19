@@ -1,17 +1,15 @@
 from django.conf.urls import url
 from mainapp.utils.custom_router import HybridRouter
 from mainapp.api import apiv1_methods as apiv1
+from mainapp.api import auth
+from mainapp.telegram import methods as tel_bot
 
 
 router = HybridRouter()
+bot_router = HybridRouter()
+auth_router = HybridRouter()
 
 # APIViews:
-router.add_api_view("User Login view",
-                    url(r'^auth/login/$', apiv1.LoginAPIView.as_view()))
-
-router.add_api_view("User REGISTRATION",
-                    url(r'^auth/register/$', apiv1.RegisterAPIView.as_view()))
-
 router.add_api_view("User Schedule for Today",
                     url(r'^get_user_schedule/$', apiv1.TodayScheduleView.as_view()))
 
@@ -38,3 +36,18 @@ router.add_api_view("Add or update student journal",
 
 router.add_api_view("Get current groups that professor is teaching",
                     url(r'^get_teaching_groups/$', apiv1.GroupsListView.as_view()))
+
+# TELEGRAM
+bot_router.add_api_view('Test',
+                        url(r'^bot/$', tel_bot.TelegramBotView.as_view()))
+
+
+# AUTH
+auth_router.add_api_view("User Login view",
+                         url(r'^login/$', auth.LoginAPIView.as_view()))
+
+auth_router.add_api_view("User REGISTRATION",
+                         url(r'^register/$', auth.RegisterAPIView.as_view()))
+
+auth_router.add_api_view("Edit Profile",
+                         url(r'^editprofile/$', auth.EditProfileView.as_view()))
