@@ -275,7 +275,7 @@ class WeeklyScheduleView(views.APIView):
 
                 return Response(result, status=status.HTTP_200_OK)
 
-            elif ProfileModel.profilemodel.is_professor:
+            elif user.profilemodel.is_professor:
                 for day in range(0, 5):
                     classes = Para.objects.filter(
                         para_professor=user.profilemodel,
