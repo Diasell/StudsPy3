@@ -9,33 +9,33 @@ class StudentJournalModel(models.Model):
     """
 
     class Meta(object):
-        verbose_name = u"Student Journal"
-        verbose_name_plural = u"Student Journal"
+        verbose_name = u"Результат"
+        verbose_name_plural = u"Результати студентів"
 
     value = models.CharField(
         max_length=55,
         blank=True,
         null=True,
-        verbose_name="Value",
+        verbose_name="Бал",
         default=''
     )
     date = models.DateField(
-        verbose_name="Date"
+        verbose_name="Дата"
     )
     discipline = models.ForeignKey(
         'mainapp.Disciplines',
-        verbose_name="Discipline"
+        verbose_name="Дисципліна"
     )
     para_number = models.ForeignKey(
         'mainapp.ParaTime',
-        verbose_name="Class #"
+        verbose_name="Номер пари"
     )
     student = models.ForeignKey(
         User,
-        verbose_name="Student"
+        verbose_name="Студент"
     )
     is_module = models.BooleanField(
-        verbose_name="Module value"
+        verbose_name="Модуль"
     )
 
     def __str__(self):

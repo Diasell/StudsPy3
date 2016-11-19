@@ -29,44 +29,44 @@ class ProfileModel(models.Model):
     user = models.OneToOneField(User, primary_key=True)
 
     is_student = models.BooleanField(
-        verbose_name=u"Student",
+        verbose_name=u"Студент",
         default=True,
     )
 
     is_professor = models.BooleanField(
-        verbose_name=u"Professor",
+        verbose_name=u"Викладач",
         default=False,
         blank=True
     )
 
     is_staff = models.BooleanField(
-        verbose_name="Staff Member",
+        verbose_name="Персонал",
         default=False,
         blank=True
     )
 
     started_date = models.DateField(
         auto_now_add=True,
-        verbose_name=u"Started Working/Studying"
+        verbose_name=u"Дата початку навчання"
     )
 
     faculty = models.ForeignKey(
         'mainapp.FacultyModel',
-        verbose_name=u"Faculty",
+        verbose_name=u"Факультет",
         blank=True,
         null=True,
     )
 
     department = models.ForeignKey(
         'mainapp.DepartmentModel',
-        verbose_name=u"Department",
+        verbose_name=u"Кафедра",
         blank=True,
         null=True,
     )
 
     student_group = models.ForeignKey(
         'mainapp.StudentGroupModel',
-        verbose_name=u"Group",
+        verbose_name=u"Група",
         blank=True,
         null=True,
     )
@@ -74,24 +74,24 @@ class ProfileModel(models.Model):
     middle_name = models.CharField(
         max_length=256,
         blank=True,
-        verbose_name=u"Middle Name",
+        verbose_name=u"По-батькові",
         default='')
 
     birthday = models.DateField(
         blank=True,
-        verbose_name=u"Date of Birth",
+        verbose_name=u"Дата народження",
         null=True)
 
     contact_phone = models.CharField(
         max_length=55,
         blank=True,
-        verbose_name=u"Contact Phone",
+        verbose_name=u"тел",
         null=True,
     )
 
     photo = models.ImageField(
         blank=True,
-        verbose_name=u"Photo",
+        verbose_name=u"Фото",
         upload_to=user_directory_path,
         null=True)
 
@@ -103,10 +103,10 @@ class ProfileModel(models.Model):
     )
 
     room = models.CharField(
+        max_length=10,
         blank=True,
         null=True,
-        max_length=10,
-        verbose_name=u'Room'
+        verbose_name=u"Аудиторія"
     )
 
     def __unicode__(self):
