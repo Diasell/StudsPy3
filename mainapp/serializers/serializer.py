@@ -101,7 +101,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             'contact_phone',
             'birthday',
             'photo',
-            'started_date'
+            'started_date',
+            'is_verified'
         )
 
 
