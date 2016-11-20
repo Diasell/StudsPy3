@@ -48,6 +48,7 @@ from ..utils.custom_utils import *
 
 TELEGRAM = 'https://api.telegram.org/bot289647729:AAENTWQjxU_JMOxnaEqffkwKqjhwV3NWHmU/sendMessage'
 
+
 def get_schedule(chat_id):
     profile = ProfileModel.objects.get(chat_id=chat_id)
     todaysdate = datetime.date.today()
@@ -102,22 +103,23 @@ def help(chat_id):
     return a
 
 
+COMMANDS = {
+    u'/start': help,
+    '/help': help,
+    '/schedule': get_schedule,
+}
+
 class TelegramBotView(APIView):
     permission_classes = (AllowAny, )
 
     def post(self, request):
         data = request.data
 
-        commands = {
-            u'/старт': help,
-            'команди': help,
-            '/розклад': get_schedule,
-        }
 
         chat_id = data['message']['chat']['id']
         user_command = data['message']['text']
 
-        func = commands.get(user_command.lower())
+        func = COMMANDS.get(user_command.lower())
         if func:
             req = requests.post(TELEGRAM, func(chat_id))
         else:
