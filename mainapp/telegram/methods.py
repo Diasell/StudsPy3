@@ -45,7 +45,6 @@ from mainapp.models.faculty import (
 # import my own helper methods
 from ..utils.custom_utils import *
 
-import json, requests
 
 TELEGRAM = 'https://api.telegram.org/bot289647729:AAENTWQjxU_JMOxnaEqffkwKqjhwV3NWHmU/sendMessage'
 
@@ -77,20 +76,23 @@ def get_schedule(chat_id):
         return a
 
 def add_chat_id(chat_id, phone_number):
-    user = User.objects.filter(username=phone_number)[0]
+    user = User.objects.filter(username=phone_number)
 
     if user:
         if not user.profilemodel.is_verified:
             user.profilemodel.chat_id = chat_id
             user.profilemodel.save()
             user.save()
-            response = 'Ваш код для реєстрації: %' % chat_id
+            response = u'Ваш код для реєстрації: %' % chat_id
         else:
-            response = 'Введений вами номер прикріплений до іншого аккаунта'
+            response = u'Введений вами номер прикріплений до іншого аккаунта'
     else:
-        response = 'Аккаунта з таким номером телефону немає. Будь ласка перевірте номер'
+        response = u'Аккаунта з таким номером телефону немає. Будь ласка перевірте номер'
 
-    return response
+    message = {}
+    message['chat_id'] = chat_id
+    message['text'] = response
+    return message
 
 
 def help(chat_id):
@@ -116,12 +118,11 @@ class TelegramBotView(APIView):
         user_command = data['message']['text']
 
         func = commands.get(user_command.lower())
-        print(func)
         if func:
             req = requests.post(TELEGRAM, func(chat_id))
         else:
             if user_command[0:3]=='380' and len(user_command)==12:
-                req = request.post(TELEGRAM, add_chat_id(chat_id, user_command))
+                req = requests.post(TELEGRAM, add_chat_id(chat_id, user_command))
             else:
                 req = requests.post(TELEGRAM, help(chat_id))
 
