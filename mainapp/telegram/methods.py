@@ -84,7 +84,7 @@ def add_chat_id(chat_id, phone_number):
             user[0].profilemodel.chat_id = chat_id
             user[0].profilemodel.save()
             user[0].save()
-            response = u'Ваш код для реєстрації: %' % chat_id
+            response = 'Ваш код для реєстрації: ' + str(chat_id)
         else:
             response = u'Введений вами номер прикріплений до іншого аккаунта'
     else:
@@ -92,7 +92,7 @@ def add_chat_id(chat_id, phone_number):
 
     message = {}
     message['chat_id'] = chat_id
-    message['text'] = response
+    message['text'] = response.encode('utf-8')
     return message
 
 
