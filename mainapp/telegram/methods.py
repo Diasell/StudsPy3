@@ -80,10 +80,10 @@ def add_chat_id(chat_id, phone_number):
     user = User.objects.filter(username=phone_number)
 
     if user:
-        if not user.profilemodel.is_verified:
-            user.profilemodel.chat_id = chat_id
-            user.profilemodel.save()
-            user.save()
+        if not user[0].profilemodel.is_verified:
+            user[0].profilemodel.chat_id = chat_id
+            user[0].profilemodel.save()
+            user[0].save()
             response = u'Ваш код для реєстрації: %' % chat_id
         else:
             response = u'Введений вами номер прикріплений до іншого аккаунта'
