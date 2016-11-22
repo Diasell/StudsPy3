@@ -152,6 +152,7 @@ class RegisterAPIView(APIView):
                     faculty=faculty[0],
                     started_date=group_started,
                     birthday=birthday,
+                    contact_phone=username,
                     photo=photo
                 )
                 new_user_profile.save()
