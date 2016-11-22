@@ -95,7 +95,7 @@ class RegisterAPIView(APIView):
         # validation user input
         if photo.size > (4096*1024):
             return Response(
-                {'Failed': 'image size is greater than 4MB'},
+                {'Failed': 'Розмір фото перевищує 4МБ'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -103,33 +103,33 @@ class RegisterAPIView(APIView):
             is_valid_image(photo)
         except Exception:
             return Response(
-                {'Failed': "attachment format is not supported"},
+                {'Failed': "Формат фото не підтримується"},
                 status=status.HTTP_403_FORBIDDEN
             )
 
         if User.objects.filter(username=username):
             return Response(
-                {'Failed': "username is already taken"},
+                {'Failed': "Такий номер телефону вже зареєстрований"},
                 status=status.HTTP_403_FORBIDDEN
             )
         if User.objects.filter(email=email):
             return Response(
-                {'Failed': "email is already taken"},
+                {'Failed': "Така адреса електронної пошти вже зареєстрована"},
                 status=status.HTTP_403_FORBIDDEN
             )
         if password != c_password:
             return Response({
-                'Failed': "passwords doesn't match"},
+                'Failed': "Паролі не співпадають"},
                 status=status.HTTP_403_FORBIDDEN
             )
         if not faculty:
             return Response({
-                'Failed': "user faculty is not valid"},
+                'Failed': "Введеного факультету не існує"},
                 status=status.HTTP_403_FORBIDDEN
             )
         if not user_group:
             return Response({
-                'Failed': "user group is not valid"},
+                'Failed': "Введена група не існує"},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -169,7 +169,7 @@ class RegisterAPIView(APIView):
         else:
             return Response({
                 'status': 'Unauthorized',
-                'message': 'Provided data is invalid'
+                'message': 'Введені дані не пройшли валідацію'
                 },
                 status=status.HTTP_403_FORBIDDEN
             )
