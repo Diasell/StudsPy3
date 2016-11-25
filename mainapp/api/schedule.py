@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # import rest framework services
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import status, views

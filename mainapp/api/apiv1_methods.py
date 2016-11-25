@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  import django services
 from django.contrib.auth.models import User
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime
 from PIL import Image
 from datetime import timedelta
