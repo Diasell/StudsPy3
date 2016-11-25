@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  import django services
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -59,6 +60,7 @@ class LoginAPIView(APIView):
                 for key in profile:
                     result[key] = profile[key]
                 result['Authorization'] = "Token %s" % token
+                result['course'] = group_year(user.profilemodel.student_group.date_started)
                 return Response(result, status=status.HTTP_200_OK)
         else:
             return Response({'message': 'Невірний номер телефону чи пароль'},
@@ -163,7 +165,7 @@ class RegisterAPIView(APIView):
                 for key in profile:
                     response[key] = profile[key]
                 response['Authorization'] = "Token %s" % token
-                response['full_name'] = new_user.get_full_name()
+                response['course'] = group_year(group_started)
 
                 return Response(response, status=status.HTTP_201_CREATED)
         else:
