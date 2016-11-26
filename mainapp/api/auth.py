@@ -2,6 +2,7 @@
 #  import django services
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.utils.datastructures import MultiValueDictKeyError
 
 # import rest framework services
 from rest_framework.authtoken.models import Token
@@ -213,18 +214,35 @@ class EditProfileView(APIView):
 
             if len(request.FILES) != 0:
                 user.profilemodel.photo = request.FILES['photo']
-            if data['first_name']:
+            try:
                 user.first_name = data['first_name']
-            if data['last_name']:
+            except MultiValueDictKeyError:
+                pass
+
+            try:
                 user.last_name = data['last_name']
-            if data['middle_name']:
+            except MultiValueDictKeyError:
+                pass
+
+            try:
                 user.profilemodel.middle_name = data['middle_name']
-            if data['password']:
+            except MultiValueDictKeyError:
+                pass
+
+            try:
                 user.set_password(data['password'])
-            if data['birthday']:
+            except MultiValueDictKeyError:
+                pass
+
+            try:
                 user.profilemodel.birthday = data['birthday']
-            if data['contact_phone']:
+            except MultiValueDictKeyError:
+                pass
+
+            try:
                 user.profilemodel.contact_phone =data['contact_phone']
+            except MultiValueDictKeyError:
+                pass
 
             user.save()
             user.profilemodel.save()
