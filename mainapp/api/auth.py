@@ -97,7 +97,7 @@ class RegisterAPIView(APIView):
         # validation user input
         if photo.size > (4096*1024):
             return Response(
-                {'Failed': 'Розмір фото перевищує 4МБ'},
+                {'message': 'Розмір фото перевищує 4МБ'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -105,33 +105,33 @@ class RegisterAPIView(APIView):
             is_valid_image(photo)
         except Exception:
             return Response(
-                {'Failed': "Формат фото не підтримується"},
+                {'message': "Формат фото не підтримується"},
                 status=status.HTTP_403_FORBIDDEN
             )
 
         if User.objects.filter(username=username):
             return Response(
-                {'Failed': "Такий номер телефону вже зареєстрований"},
+                {'message': "Такий номер телефону вже зареєстрований"},
                 status=status.HTTP_403_FORBIDDEN
             )
         if User.objects.filter(email=email):
             return Response(
-                {'Failed': "Така адреса електронної пошти вже зареєстрована"},
+                {'message': "Така адреса електронної пошти вже зареєстрована"},
                 status=status.HTTP_403_FORBIDDEN
             )
         if password != c_password:
             return Response({
-                'Failed': "Паролі не співпадають"},
+                'message': "Паролі не співпадають"},
                 status=status.HTTP_403_FORBIDDEN
             )
         if not faculty:
             return Response({
-                'Failed': "Введеного факультету не існує"},
+                'message': "Введеного факультету не існує"},
                 status=status.HTTP_403_FORBIDDEN
             )
         if not user_group:
             return Response({
-                'Failed': "Введена група не існує"},
+                'message': "Введена група не існує"},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -191,12 +191,12 @@ class AddChatIdView(APIView):
                 user.profilemodel.is_verified = True
                 user.profilemodel.save()
                 user.save()
-                return Response({'status':'success'}, status=status.HTTP_200_OK)
+                return Response({'message':'success'}, status=status.HTTP_200_OK)
             else:
-                return Response({'status':'Invalid Chat ID'}, status=status.HTTP_403_FORBIDDEN)
+                return Response({'message':'Невіринй код'}, status=status.HTTP_403_FORBIDDEN)
 
         else:
-            return Response({'status':'Invalid Token'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'status':'Невірний токен'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class EditProfileView(APIView):
@@ -236,7 +236,7 @@ class EditProfileView(APIView):
         else:
             return Response({
                 'status': 'Unauthorized',
-                'message': 'Provided data is invalid'
+                'message': 'Не авторизовано'
             },
                 status=status.HTTP_403_FORBIDDEN
             )
