@@ -154,3 +154,14 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
             'old_password',
             'new_password'
         )
+
+
+class ForgotPasswordViewSerializer(serializers.ModelSerializer):
+    """
+        Serializer for DRF DOCS for ForgotPassword EndPoint
+        """
+    class Meta:
+        model = User
+        fields = (
+            'username',
+        )
