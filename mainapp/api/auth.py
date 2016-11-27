@@ -26,7 +26,8 @@ from mainapp.serializers.docs_serializer import (
     RegisterViewSerializer,
     LoginViewSerializer,
     EditProfileViewSerializer,
-    AddChatIDSerializer)
+    AddChatIDSerializer,
+    ChangePasswordSerializer)
 
 # import needed app models
 from mainapp.models.userProfile import ProfileModel
@@ -192,12 +193,12 @@ class AddChatIdView(APIView):
                 user.profilemodel.is_verified = True
                 user.profilemodel.save()
                 user.save()
-                return Response({'message':'success'}, status=status.HTTP_200_OK)
+                return Response({'message': 'success'}, status=status.HTTP_200_OK)
             else:
-                return Response({'message':'Невіринй код'}, status=status.HTTP_403_FORBIDDEN)
+                return Response({'message': 'Невіринй код'}, status=status.HTTP_403_FORBIDDEN)
 
         else:
-            return Response({'status':'Невірний токен'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'status': 'Невірний токен'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class EditProfileView(APIView):
@@ -230,7 +231,7 @@ class EditProfileView(APIView):
                 pass
 
             try:
-                user.set_password(data['password'])
+                user.email = data['email']
             except MultiValueDictKeyError:
                 pass
 
@@ -240,7 +241,7 @@ class EditProfileView(APIView):
                 pass
 
             try:
-                user.profilemodel.contact_phone =data['contact_phone']
+                user.profilemodel.contact_phone = data['contact_phone']
             except MultiValueDictKeyError:
                 pass
 
@@ -252,9 +253,34 @@ class EditProfileView(APIView):
                 result[key] = profile[key]
             return Response(result, status=status.HTTP_200_OK)
         else:
-            return Response({
-                'status': 'Unauthorized',
-                'message': 'Не авторизовано'
-            },
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({'status': 'Unauthorized',
+                             'message': 'Не авторизовано'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+
+class ChangePasswordView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ChangePasswordSerializer
+
+    def post(self, request):
+        user = request.user
+        old_password = user.data['old_password']
+        new_password = user.data['new_password']
+
+        if user.is_active:
+            if user.check_password(old_password):
+                user.set_password(new_password)
+                user.save()
+                return Response({'status': 'Success',
+                                 'message': u'Пароль успішно змінено'},
+                                status=status.HTTP_200_OK)
+            else:
+                return Response({'status': 'Failed',
+                                 'message': u'Старий пароль не вірний'},
+                                status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            return Response({'status': 'Unauthorized',
+                             'message': 'Не авторизовано'},
+                            status=status.HTTP_403_FORBIDDEN)
+

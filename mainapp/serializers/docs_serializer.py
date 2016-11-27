@@ -139,3 +139,18 @@ class GetStJournalSerializer(serializers.ModelSerializer):
             'student',
             'discipline'
         )
+
+
+class ChangePasswordSerializer(serializers.ModelSerializer):
+    """
+    Serializer for ChangePasswordView for DRF DOCS
+    """
+    old_password = serializers.CharField(source='user.password')
+    new_password = serializers.CharField(source='user.password')
+
+    class Meta:
+        model = Token
+        fields =(
+            'old_password',
+            'new_password'
+        )
