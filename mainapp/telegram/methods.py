@@ -47,35 +47,59 @@ from mainapp.models.faculty import (
 from ..utils.custom_utils import *
 
 
-TELEGRAM = 'https://api.telegram.org/bot289647729:AAENTWQjxU_JMOxnaEqffkwKqjhwV3NWHmU/sendMessage'
+STUDS_BOT_TOKEN = '289647729:AAENTWQjxU_JMOxnaEqffkwKqjhwV3NWHmU'
+
+class TelegramBot():
+
+    def __init__(self, bot_token):
+        self.url = 'https://api.telegram.org/bot' + bot_token
+
+    def send_message(self, message, chat_id):
+        url = self.url + "/sendMessage"
+        response ={}
+        response['chat_id'] = chat_id
+        response['text'] = message
+        send = requests.post(url, response)
+        return send
+
+
+STUDS_TELEGRAM_BOT = TelegramBot(STUDS_BOT_TOKEN)
 
 
 def get_schedule(chat_id):
-    profile = ProfileModel.objects.get(chat_id=chat_id)
-    todaysdate = datetime.date.today()
-    weektype = get_weektype(todaysdate)
-    current_weekday = datetime.date.today().weekday()  # integer 0-monday .. 6-Sunday
-    today = WorkingDay.objects.get(dayoftheweeknumber=current_weekday)
-    current_semester = StartSemester.objects.get(
-        semesterstart__lt=todaysdate,
-        semesterend__gt=todaysdate
-    )
-    if profile.is_student:
-        student_group = profile.student_group
+    profile = ProfileModel.objects.filter(chat_id=chat_id)
+    if profile:
+        profile = profile[0]
+        todaysdate = datetime.date.today()
+        weektype = get_weektype(todaysdate)
+        current_weekday = datetime.date.today().weekday()  # integer 0-monday .. 6-Sunday
+        today = WorkingDay.objects.filter(dayoftheweeknumber=current_weekday)
+        if today:
+            today= today[0]
+            current_semester = StartSemester.objects.get(
+                semesterstart__lt=todaysdate,
+                semesterend__gt=todaysdate
+            )
+            if profile.is_student:
+                student_group = profile.student_group
 
-        classes_for_today = Para.objects.filter(
-            para_group=student_group,
-            para_day=today,
-            week_type=weektype,
-            semester=current_semester
-        )
-        result = ''
-        for i, para in enumerate(classes_for_today):
-            result += ParaSerializer(para).data['para_number'] + ' : ' + ParaSerializer(para).data['discipline'] + "\n"
-        a = {}
-        a["chat_id"] = chat_id
-        a['text'] = result
-        return a
+                classes_for_today = Para.objects.filter(
+                    para_group=student_group,
+                    para_day=today,
+                    week_type=weektype,
+                    semester=current_semester
+                )
+                if classes_for_today:
+                    result = ''
+                    for i, para in enumerate(classes_for_today):
+                        result += ParaSerializer(para).data['para_number'] + ' : ' + ParaSerializer(para).data['discipline'] + "\n"
+                    return result
+                else:
+                    return "Жодної пари сьогодні! Здається у когось з'явився час на саморозвиток :)"
+        else:
+            return "Довгоочікуваний вихідний... Можна і трішки відпочити :)"
+    else:
+        return "Жоден користувач в базі не зв'язаний із вашим аккаунтом в Telegram"
 
 def add_chat_id(chat_id, phone_number):
     user = User.objects.filter(username=phone_number)
@@ -91,17 +115,12 @@ def add_chat_id(chat_id, phone_number):
     else:
         response = u'Аккаунта з таким номером телефону немає. Будь ласка перевірте номер'
 
-    message = {}
-    message['chat_id'] = chat_id
-    message['text'] = response.encode('utf-8')
-    return message
+    return response.encode('utf-8')
 
 
 def help(chat_id):
-    a = {}
-    a["chat_id"] = chat_id
-    a['text'] = "commands:\n/schedule" + '\n' + 'chat_id: ' + str(chat_id)
-    return a
+    help = "commands:\n/schedule" + '\n' + 'chat_id: ' + str(chat_id)
+    return help
 
 
 COMMANDS = {
@@ -122,11 +141,14 @@ class TelegramBotView(APIView):
 
         func = COMMANDS.get(user_command.lower())
         if func:
-            req = requests.post(TELEGRAM, func(chat_id))
+            # req = requests.post(TELEGRAM, func(chat_id))
+            req = STUDS_TELEGRAM_BOT.send_message(func(chat_id), chat_id)
         else:
             if user_command[0:3]=='380' and len(user_command)==12:
-                req = requests.post(TELEGRAM, add_chat_id(chat_id, user_command))
+                # req = requests.post(TELEGRAM, add_chat_id(chat_id, user_command))
+                req =STUDS_TELEGRAM_BOT.send_message(add_chat_id(chat_id, user_command), chat_id)
             else:
-                req = requests.post(TELEGRAM, help(chat_id))
+                # req = requests.post(TELEGRAM, help(chat_id))
+                req = STUDS_TELEGRAM_BOT.send_message(help(chat_id), chat_id)
 
         return Response(req.json(), status=req.status_code)
