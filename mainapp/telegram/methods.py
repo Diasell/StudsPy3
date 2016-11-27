@@ -122,11 +122,29 @@ def help(chat_id):
     help = "commands:\n/schedule" + '\n' + 'chat_id: ' + str(chat_id)
     return help
 
+def forgot_password(chat_id):
+    user_profile = ProfileModel.objects.filter(chat_id=chat_id)[0]
+    if user_profile:
+        user = User.objects.filter(user__profilemodel=user_profile)[0]
+    else:
+        return "Жоден користувач в базі не зв'язаний із вашим аккаунтом в Telegram"
+
+    if user is not None:
+        temp_password = generate_new_password()
+        user.set_password(temp_password)
+        user.save()
+        message=u'Ваш новий пароль:\n' + temp_password
+        message1 = u"Ви можете змінити його в нашлаштуваннях вашого профілю"
+        return message + message1
+    else:
+        return "Жоден користувач в базі не зв'язаний із вашим аккаунтом в Telegram"
+
 
 COMMANDS = {
     u'/start': help,
     '/help': help,
     '/schedule': get_schedule,
+    '/forgot_password': forgot_password
 }
 
 class TelegramBotView(APIView):

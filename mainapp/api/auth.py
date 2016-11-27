@@ -27,8 +27,7 @@ from mainapp.serializers.docs_serializer import (
     LoginViewSerializer,
     EditProfileViewSerializer,
     AddChatIDSerializer,
-    ChangePasswordSerializer,
-    ForgotPasswordViewSerializer)
+    ChangePasswordSerializer,)
 
 # import needed app models
 from mainapp.models.userProfile import ProfileModel
@@ -38,7 +37,6 @@ from mainapp.models.faculty import (
 
 # import my own helper methods
 from ..utils.custom_utils import *
-from ..telegram.methods import STUDS_TELEGRAM_BOT
 
 
 class LoginAPIView(APIView):
@@ -298,44 +296,44 @@ class ChangePasswordView(APIView):
                             status=status.HTTP_403_FORBIDDEN)
 
 
-class ForgotPasswordView(APIView):
-    authentication_classes = (AllowAny,)
-    permission_classes = (AllowAny,)
-    serializer_class = ForgotPasswordViewSerializer
-
-    def post(self, request):
-        username = request.data['username']
-
-        user_filter = User.objects.filter(username=username)
-
-        if len(user_filter)>0:
-            user = user_filter[0]
-            if user.profilemodel.is_verified:
-                if user.is_active:
-                    temp_password = generate_new_password()
-                    user.set_password(temp_password)
-                    user.save()
-
-                    message=u'Ваш новий пароль:\n' + temp_password
-                    message1 = u"Ви можете змінити його в нашлаштуваннях вашого профілю"
-                    STUDS_TELEGRAM_BOT.send_message(message + message1, user.profilemodel.chat_id)
-
-                    return Response({'status': 'Success',
-                                     'message': 'Новий пароль був надісланий чат ботом'},
-                                    status=status.HTTP_200_OK)
-
-                else:
-                    return Response({'status': 'Unauthorized',
-                                     'message': 'Аккаунт не активний'},
-                                    status=status.HTTP_403_FORBIDDEN)
-            else:
-                return Response({'status': 'Unauthorized',
-                                 'message': 'Аккаунт не пройшов верифікацію Telergam ботом'},
-                                status=status.HTTP_403_FORBIDDEN)
-        else:
-            return Response({'status': 'Unauthorized',
-                             'message': 'Користувача з таким номером телефону не існує'},
-                            status=status.HTTP_403_FORBIDDEN)
+# class ForgotPasswordView(APIView):
+#     authentication_classes = (AllowAny,)
+#     permission_classes = (AllowAny,)
+#     serializer_class = ForgotPasswordViewSerializer
+#
+#     def post(self, request):
+#         username = request.data['username']
+#
+#         user_filter = User.objects.filter(username=username)
+#
+#         if len(user_filter)>0:
+#             user = user_filter[0]
+#             if user.profilemodel.is_verified:
+#                 if user.is_active:
+#                     temp_password = generate_new_password()
+#                     user.set_password(temp_password)
+#                     user.save()
+#
+#                     message=u'Ваш новий пароль:\n' + temp_password
+#                     message1 = u"Ви можете змінити його в нашлаштуваннях вашого профілю"
+#                     STUDS_TELEGRAM_BOT.send_message(message + message1, user.profilemodel.chat_id)
+#
+#                     return Response({'status': 'Success',
+#                                      'message': 'Новий пароль був надісланий чат ботом'},
+#                                     status=status.HTTP_200_OK)
+#
+#                 else:
+#                     return Response({'status': 'Unauthorized',
+#                                      'message': 'Аккаунт не активний'},
+#                                     status=status.HTTP_403_FORBIDDEN)
+#             else:
+#                 return Response({'status': 'Unauthorized',
+#                                  'message': 'Аккаунт не пройшов верифікацію Telergam ботом'},
+#                                 status=status.HTTP_403_FORBIDDEN)
+#         else:
+#             return Response({'status': 'Unauthorized',
+#                              'message': 'Користувача з таким номером телефону не існує'},
+#                             status=status.HTTP_403_FORBIDDEN)
 
 
 
