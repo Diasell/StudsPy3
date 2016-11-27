@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import datetime
+import datetime, random, string
 from PIL import Image
 from datetime import timedelta
 
@@ -100,3 +100,11 @@ def custom_logger(data, user):
     filename = path + time + '.log'
     with open(filename, "w+") as f:
         f.write(str(user) + ':' + str(data))
+
+
+def generate_new_password():
+    """
+    :return: String that can be used as password for User object
+    """
+    new_password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(8))
+    return new_password
