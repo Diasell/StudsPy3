@@ -67,7 +67,8 @@ class LoginAPIView(APIView):
                 result['course'] = group_year(user.profilemodel.student_group.date_started)
                 return Response(result, status=status.HTTP_200_OK)
         else:
-            return Response({'message': 'Невірний номер телефону чи пароль'},
+            return Response({'status': 'failure',
+                             'message': 'Невірний номер телефону чи пароль'},
                             status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -101,7 +102,8 @@ class RegisterAPIView(APIView):
         # validation user input
         if photo.size > (4096*1024):
             return Response(
-                {'message': 'Розмір фото перевищує 4МБ'},
+                {'status': 'failure',
+                 'message': 'Розмір фото перевищує 4МБ'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -109,35 +111,33 @@ class RegisterAPIView(APIView):
             is_valid_image(photo)
         except Exception:
             return Response(
-                {'message': "Формат фото не підтримується"},
-                status=status.HTTP_403_FORBIDDEN
-            )
+                {'status': 'failure',
+                 'message': "Формат фото не підтримується"},
+                status=status.HTTP_403_FORBIDDEN)
 
         if User.objects.filter(username=username):
             return Response(
-                {'message': "Такий номер телефону вже зареєстрований"},
-                status=status.HTTP_403_FORBIDDEN
-            )
+                {'status': 'failure',
+                 'message': "Такий номер телефону вже зареєстрований"},
+                status=status.HTTP_403_FORBIDDEN)
         if User.objects.filter(email=email):
             return Response(
-                {'message': "Така адреса електронної пошти вже зареєстрована"},
-                status=status.HTTP_403_FORBIDDEN
-            )
+                {'status': 'failure',
+                 'message': "Така адреса електронної пошти вже зареєстрована"},
+                status=status.HTTP_403_FORBIDDEN)
         if password != c_password:
-            return Response({
-                'message': "Паролі не співпадають"},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({'status': 'failure',
+                             'message': "Паролі не співпадають"},
+                            status=status.HTTP_403_FORBIDDEN)
         if not faculty:
-            return Response({
-                'message': "Введеного факультету не існує"},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({'status': 'failure',
+                             'message': "Введеного факультету не існує"},
+                            status=status.HTTP_403_FORBIDDEN)
         if not user_group:
             return Response({
+                'status': 'failure',
                 'message': "Введена група не існує"},
-                status=status.HTTP_403_FORBIDDEN
-            )
+                status=status.HTTP_403_FORBIDDEN)
 
         serialized = UserSerializer(data=request.data).is_valid()
 
@@ -162,23 +162,22 @@ class RegisterAPIView(APIView):
                     photo=photo
                 )
                 new_user_profile.save()
-
                 token = Token.objects.get_or_create(user=new_user)[0]
-                profile = ProfileSerializer(new_user_profile).data
-                response = dict()
-                for key in profile:
-                    response[key] = profile[key]
-                response['Authorization'] = "Token %s" % token
-                response['course'] = group_year(group_started)
+
+                response={}
+                data = {}
+                response['status'] = 'success'
+                data['message'] = 'user has been registered successfully'
+                data['Authorization'] = "Token %s" % token
+                response['data'] = data
 
                 return Response(response, status=status.HTTP_201_CREATED)
         else:
             return Response({
-                'status': 'Unauthorized',
+                'status': 'failure',
                 'message': 'Введені дані не пройшли валідацію'
                 },
-                status=status.HTTP_403_FORBIDDEN
-            )
+                status=status.HTTP_403_FORBIDDEN)
 
 
 class AddChatIdView(APIView):
@@ -195,12 +194,24 @@ class AddChatIdView(APIView):
                 user.profilemodel.is_verified = True
                 user.profilemodel.save()
                 user.save()
-                return Response({'message': 'success'}, status=status.HTTP_200_OK)
+
+                token = Token.objects.get_or_create(user=user)[0]
+                profile = ProfileSerializer(user.profilemodel).data
+                response = dict()
+                for key in profile:
+                    response[key] = profile[key]
+                response['Authorization'] = "Token %s" % token
+                response['course'] = group_year(user.profilemodel.student_group.date_started)
+                return Response(response, status=status.HTTP_200_OK)
             else:
-                return Response({'message': 'Невіринй код'}, status=status.HTTP_403_FORBIDDEN)
+                return Response({'status': 'failure',
+                                 'message': 'Невіринй код'},
+                                status=status.HTTP_403_FORBIDDEN)
 
         else:
-            return Response({'status': 'Невірний токен'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'status': 'failure',
+                             'message': 'Не авторизована дія'},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
 
 class EditProfileView(APIView):
@@ -278,7 +289,7 @@ class ChangePasswordView(APIView):
                                  'message': u'Пароль успішно змінено'},
                                 status=status.HTTP_200_OK)
             else:
-                return Response({'status': 'Failed',
+                return Response({'status': 'failure',
                                  'message': u'Старий пароль не вірний'},
                                 status=status.HTTP_401_UNAUTHORIZED)
         else:
