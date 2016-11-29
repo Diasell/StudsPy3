@@ -97,6 +97,10 @@ def add_chat_id(chat_id, phone_number):
 
 
 def userhelp(chat_id):
+    line1 = "commands:"
+    line2 = "/schedule"
+    line3 = "/forgot_password"
+    line4 = "/classmates"
     return "commands:\n/schedule" + '\n' + 'chat_id: ' + str(chat_id)
 
 
@@ -118,10 +122,30 @@ def forgot_password(chat_id):
         return "Жоден користувач в базі не зв'язаний із вашим аккаунтом в Telegram"
 
 
+def classmates(chat_id):
+    user_profile = ProfileModel.objects.filter(chat_id=chat_id)
+    if user_profile:
+        user = User.objects.filter(profilemodel=user_profile)[0]
+    else:
+        return "Жоден користувач в базі не зв'язаний із вашим аккаунтом в Telegram"
+
+    if user is not None:
+        user_group = user.profilemodel.student_group
+        list_of_students = ProfileModel.objects.filter(student_group=user_group)
+        message = u""
+        for profile in list_of_students:
+            line = User.objects.get(profilemodel=profile).get_full_name() + ':' + " " + profile.contact_phone + '\n'
+            message+= line
+        return message
+
+    else:
+        return "Жоден користувач в базі не зв'язаний із вашим аккаунтом в Telegram"
+
 COMMANDS = {
     '/help': userhelp,
     '/schedule': get_schedule,
-    '/forgot_password': forgot_password}
+    '/forgot_password': forgot_password,
+    '/classmates': classmates}
 
 
 class TelegramBotView(APIView):
