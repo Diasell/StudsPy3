@@ -40,32 +40,23 @@ class TodayScheduleView(views.APIView):
                 semesterstart__lt=todaysdate,
                 semesterend__gt=todaysdate
             )
-            if user.profilemodel.is_student:
-                student_group = user.profilemodel.student_group
 
-                classes_for_today = Para.objects.filter(
-                    para_group=student_group,
-                    para_day=today,
-                    week_type=weektype,
-                    semester=current_semester
-                )
-                result = dict()
-                for i, para in enumerate(classes_for_today):
-                    result["para_%s" % i] = ParaSerializer(para).data
-                return Response(result, status=status.HTTP_200_OK)
-            elif user.profilemodel.is_professor:
-                classes_for_today = Para.objects.filter(
-                    para_professor=user.profilemodel,
-                    para_day=today,
-                    week_type=weektype
-                )
-                result = dict()
-                for i, para in enumerate(classes_for_today):
-                    result["para_%s" % i] = ParaSerializer(para).data
-                return Response(result, status=status.HTTP_200_OK)
+            student_group = user.profilemodel.student_group
+
+            classes_for_today = Para.objects.filter(
+                para_group=student_group,
+                para_day=today,
+                week_type=weektype,
+                semester=current_semester
+            )
+            result = dict()
+            for i, para in enumerate(classes_for_today):
+                result["para_%s" % i] = ParaSerializer(para).data
+            response = create_response_scelet('success', 'schedule for today', result)
+            return Response(response, status=status.HTTP_200_OK)
         else:
-            return Response({"UnAuth": "Current user is not active"},
-                            status=status.HTTP_401_UNAUTHORIZED)
+            response = create_response_scelet('failure', 'Не авторизована дія', {})
+            return Response(response, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class WeeklyScheduleView(views.APIView):
@@ -87,43 +78,26 @@ class WeeklyScheduleView(views.APIView):
                 semesterstart__lt=todaysdate,
                 semesterend__gt=todaysdate
             )
-            if user.profilemodel.is_student:
-                student_group = user.profilemodel.student_group
+            student_group = user.profilemodel.student_group
 
-                for day in range(0, 5):
-                    classes = Para.objects.filter(
-                        para_group=student_group,
-                        para_day__dayoftheweeknumber=day,
-                        week_type=weektype,
-                        semester=current_semester
-                    )
+            for day in range(0, 5):
+                classes = Para.objects.filter(
+                    para_group=student_group,
+                    para_day__dayoftheweeknumber=day,
+                    week_type=weektype,
+                    semester=current_semester
+                )
 
-                    day_js = dict()
-                    for i, para in enumerate(classes):
-                        day_js["para_%s" % i] = ParaSerializer(para).data
+                day_js = dict()
+                for i, para in enumerate(classes):
+                    day_js["para_%s" % i] = ParaSerializer(para).data
 
-                    result["%s" % days[day]] = day_js
-
-                return Response(result, status=status.HTTP_200_OK)
-
-            elif user.profilemodel.is_professor:
-                for day in range(0, 5):
-                    classes = Para.objects.filter(
-                        para_professor=user.profilemodel,
-                        para_day__dayoftheweeknumber=day,
-                        week_type=weektype,
-                        semester=current_semester
-                    )
-
-                    day_js = dict()
-                    for i, para in enumerate(classes):
-                        day_js["para_%s" % i] = ParaSerializer(para).data
-
-                    result["%s" % days[day]] = day_js
-                return Response(result, status=status.HTTP_200_OK)
+                result["%s" % days[day]] = day_js
+            response = create_response_scelet('success', 'schedule for current week', result)
+            return Response(response, status=status.HTTP_200_OK)
         else:
-            return Response({"UnAuth": "Current user is not active"},
-                            status=status.HTTP_401_UNAUTHORIZED)
+            response = create_response_scelet('failure', 'Не авторизована дія', {})
+            return Response(response, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class NextWeeklyScheduleView(views.APIView):
@@ -145,40 +119,23 @@ class NextWeeklyScheduleView(views.APIView):
                 semesterstart__lt=todaysdate,
                 semesterend__gt=todaysdate
             )
-            if user.profilemodel.is_student:
-                student_group = user.profilemodel.student_group
+            student_group = user.profilemodel.student_group
 
-                for day in range(0, 5):
-                    classes = Para.objects.filter(
-                        para_group=student_group,
-                        para_day__dayoftheweeknumber=day,
-                        week_type=weektype,
-                        semester=current_semester,
-                    )
+            for day in range(0, 5):
+                classes = Para.objects.filter(
+                    para_group=student_group,
+                    para_day__dayoftheweeknumber=day,
+                    week_type=weektype,
+                    semester=current_semester,
+                )
 
-                    day_js = dict()
-                    for i, para in enumerate(classes):
-                        day_js["para_%s" % i] = ParaSerializer(para).data
+                day_js = dict()
+                for i, para in enumerate(classes):
+                    day_js["para_%s" % i] = ParaSerializer(para).data
 
-                    result["%s" % days[day]] = day_js
-
-                return Response(result, status=status.HTTP_200_OK)
-
-            elif user.profilemodel.is_professor:
-                for day in range(0, 5):
-                    classes = Para.objects.filter(
-                        para_professor=user.profilemodel,
-                        para_day__dayoftheweeknumber=day,
-                        week_type=weektype,
-                        semester=current_semester
-                    )
-
-                    day_js = dict()
-                    for i, para in enumerate(classes):
-                        day_js["para_%s" % ParaSerializer(para).data['para_number']] = ParaSerializer(para).data
-
-                    result["%s" % days[day]] = day_js
-                return Response(result, status=status.HTTP_200_OK)
+                result["%s" % days[day]] = day_js
+            response = create_response_scelet('success', 'schedule for next week', result)
+            return Response(response, status=status.HTTP_200_OK)
         else:
-            return Response({"UnAuth": "Current user is not active"},
-                            status=status.HTTP_401_UNAUTHORIZED)
+            response = create_response_scelet('failure', 'Не авторизована дія', {})
+            return Response(response, status=status.HTTP_401_UNAUTHORIZED)
