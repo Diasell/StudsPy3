@@ -49,14 +49,15 @@ from ..utils.custom_utils import *
 
 STUDS_BOT_TOKEN = '289647729:AAENTWQjxU_JMOxnaEqffkwKqjhwV3NWHmU'
 
-class TelegramBot():
+
+class TelegramBot:
 
     def __init__(self, bot_token):
         self.url = 'https://api.telegram.org/bot' + bot_token
 
     def send_message(self, message, chat_id):
         url = self.url + "/sendMessage"
-        response ={}
+        response = dict()
         response['chat_id'] = chat_id
         response['text'] = message
         send = requests.post(url, response)
@@ -75,7 +76,7 @@ def get_schedule(chat_id):
         current_weekday = datetime.date.today().weekday()  # integer 0-monday .. 6-Sunday
         today = WorkingDay.objects.filter(dayoftheweeknumber=current_weekday)
         if today:
-            today= today[0]
+            today = today[0]
             current_semester = StartSemester.objects.get(
                 semesterstart__lt=todaysdate,
                 semesterend__gt=todaysdate
@@ -92,7 +93,8 @@ def get_schedule(chat_id):
                 if classes_for_today:
                     result = ''
                     for i, para in enumerate(classes_for_today):
-                        result += ParaSerializer(para).data['para_number'] + ' : ' + ParaSerializer(para).data['discipline'] + "\n"
+                        result += ParaSerializer(para).data['para_number'] + ' : ' \
+                                  + ParaSerializer(para).data['discipline'] + "\n"
                     return result
                 else:
                     return "Жодної пари сьогодні! Здається у когось з'явився час на саморозвиток :)"
@@ -100,6 +102,7 @@ def get_schedule(chat_id):
             return "Довгоочікуваний вихідний... Можна і трішки відпочити :)"
     else:
         return "Жоден користувач в базі не зв'язаний із вашим аккаунтом в Telegram"
+
 
 def add_chat_id(chat_id, phone_number):
     user = User.objects.filter(username=phone_number)
@@ -118,9 +121,9 @@ def add_chat_id(chat_id, phone_number):
     return response.encode('utf-8')
 
 
-def help(chat_id):
-    help = "commands:\n/schedule" + '\n' + 'chat_id: ' + str(chat_id)
-    return help
+def userhelp(chat_id):
+    return "commands:\n/schedule" + '\n' + 'chat_id: ' + str(chat_id)
+
 
 def forgot_password(chat_id):
     user_profile = ProfileModel.objects.filter(chat_id=chat_id)[0]
@@ -133,7 +136,7 @@ def forgot_password(chat_id):
         temp_password = generate_new_password()
         user.set_password(temp_password)
         user.save()
-        message=u'Ваш новий пароль:\n' + temp_password
+        message = u'Ваш новий пароль:\n' + temp_password
         message1 = u"Ви можете змінити його в нашлаштуваннях вашого профілю"
         return message + message1
     else:
@@ -141,32 +144,26 @@ def forgot_password(chat_id):
 
 
 COMMANDS = {
-    u'/start': help,
-    '/help': help,
+    '/help': userhelp,
     '/schedule': get_schedule,
-    '/forgot_password': forgot_password
-}
+    '/forgot_password': forgot_password}
+
 
 class TelegramBotView(APIView):
     permission_classes = (AllowAny, )
 
     def post(self, request):
         data = request.data
-
-
         chat_id = data['message']['chat']['id']
         user_command = data['message']['text']
 
         func = COMMANDS.get(user_command.lower())
         if func:
-            # req = requests.post(TELEGRAM, func(chat_id))
             req = STUDS_TELEGRAM_BOT.send_message(func(chat_id), chat_id)
         else:
-            if user_command[0:3]=='380' and len(user_command)==12:
-                # req = requests.post(TELEGRAM, add_chat_id(chat_id, user_command))
-                req =STUDS_TELEGRAM_BOT.send_message(add_chat_id(chat_id, user_command), chat_id)
+            if user_command[0:3] == '380' and len(user_command) == 12:
+                req = STUDS_TELEGRAM_BOT.send_message(add_chat_id(chat_id, user_command), chat_id)
             else:
-                # req = requests.post(TELEGRAM, help(chat_id))
-                req = STUDS_TELEGRAM_BOT.send_message(help(chat_id), chat_id)
+                req = STUDS_TELEGRAM_BOT.send_message(userhelp(chat_id), chat_id)
 
         return Response(req.json(), status=req.status_code)
