@@ -103,7 +103,7 @@ def userhelp(chat_id):
 def forgot_password(chat_id):
     user_profile = ProfileModel.objects.filter(chat_id=chat_id)
     if user_profile:
-        user = User.objects.filter(user__profilemodel=user_profile)[0]
+        user = User.objects.filter(profilemodel=user_profile)[0]
     else:
         return "Жоден користувач в базі не зв'язаний із вашим аккаунтом в Telegram"
 
