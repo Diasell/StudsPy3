@@ -80,6 +80,48 @@ def get_schedule(chat_id):
         return "Жоден користувач в базі не зв'язаний із вашим аккаунтом в Telegram"
 
 
+def get_tomorrow_schedule(chat_id):
+    profile = ProfileModel.objects.filter(chat_id=chat_id)
+    if profile:
+        profile = profile[0]
+        todaysdate = datetime.date.today()
+        weektype = get_weektype(todaysdate)
+        current_weekday = datetime.date.today().weekday() # integer 0-monday .. 6-Sunday
+        if current_weekday == 6:
+            tomorrow = WorkingDay.objects.filter(dayoftheweeknumber=0)
+            weektype = not weektype
+        else:
+            tomorrow = WorkingDay.objects.filter(dayoftheweeknumber=current_weekday+1)
+        if tomorrow:
+            tomorrow = tomorrow[0]
+            current_semester = StartSemester.objects.get(
+                semesterstart__lt=todaysdate,
+                semesterend__gt=todaysdate
+            )
+            if profile.is_student:
+                student_group = profile.student_group
+
+                classes_for_tomorrow = Para.objects.filter(
+                    para_group=student_group,
+                    para_day=tomorrow,
+                    week_type=weektype,
+                    semester=current_semester
+                )
+                if classes_for_tomorrow:
+                    result = ''
+                    for i, para in enumerate(classes_for_tomorrow):
+                        result += ParaSerializer(para).data['para_number'] + ' : ' \
+                                  + ParaSerializer(para).data['discipline'] \
+                                  +'('+ ParaSerializer(para).data['room'] + ')'  + "\n"
+                    return result
+                else:
+                    return "Жодної пари завтра! Здається у когось з'явився час на саморозвиток :)"
+        else:
+            return "Довгоочікуваний вихідний... Можна і трішки відпочити :)"
+    else:
+        return "Жоден користувач в базі не зв'язаний із вашим аккаунтом в Telegram"
+
+
 def add_chat_id(chat_id, phone_number):
     user = User.objects.filter(username=phone_number)
 
@@ -102,7 +144,8 @@ def userhelp():
         "commands:\n",
         "/schedule\n",
         "/forgot_password\n",
-        "/classmates"
+        "/classmates\n",
+        "/tomorrow"
     ]
     message = u""
     for key in all_help:
@@ -151,7 +194,8 @@ COMMANDS = {
     '/help': userhelp,
     '/schedule': get_schedule,
     '/forgot_password': forgot_password,
-    '/classmates': classmates}
+    '/classmates': classmates,
+    '/tomorrow': get_tomorrow_schedule}
 
 
 class TelegramBotView(APIView):
