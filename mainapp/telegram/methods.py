@@ -142,10 +142,10 @@ def add_chat_id(chat_id, phone_number):
 def userhelp():
     all_help = [
         "commands:\n",
-        "/schedule\n",
-        "/forgot_password\n",
+        "/today\n",
+        "/tomorrow\n",
         "/classmates\n",
-        "/tomorrow"
+        "/forgot_password\n"
     ]
     message = u""
     for key in all_help:
@@ -192,7 +192,7 @@ def classmates(chat_id):
 
 COMMANDS = {
     '/help': userhelp,
-    '/schedule': get_schedule,
+    '/today': get_schedule,
     '/forgot_password': forgot_password,
     '/classmates': classmates,
     '/tomorrow': get_tomorrow_schedule}
