@@ -136,7 +136,7 @@ class ListFacultyView(APIView):
                                    group.date_started,
                                    group_year(group.date_started)])
             response[faculty.title] = groups
-        data = create_response_scelet('success', 'Faculties structure', response)
+        data = create_response_scelet('success', 'Faculties structure', for_ios_format(response))
         return Response(data, status=status.HTTP_200_OK)
 
 
