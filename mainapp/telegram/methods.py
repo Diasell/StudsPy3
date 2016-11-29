@@ -1,47 +1,22 @@
 # -*- coding: utf-8 -*-
 import requests
+
 #  import django services
-from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
 # import rest framework services
-from rest_framework.authtoken.models import Token
-from rest_framework.authentication import (
-    TokenAuthentication,
-    BasicAuthentication)
-from rest_framework import status, views
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.parsers import MultiPartParser, JSONParser
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-
 # import db models serializers
-from mainapp.serializers.serializer import (
-    UserSerializer,
-    ProfileSerializer,
-    ParaSerializer,
-    StudentJournalSerializer)
-
-# import cropped serializers for docs page
-from mainapp.serializers.docs_serializer import (
-    RegisterViewSerializer,
-    LoginViewSerializer,
-    AuthorizationSerializer,
-    GroupStudentsSerializer,
-    GetStJournalSerializer)
+from mainapp.serializers.serializer import ParaSerializer
 
 # import needed app models
 from mainapp.models.userProfile import ProfileModel
-from mainapp.models.student import StudentJournalModel
+
 from mainapp.models.helpermodels import WorkingDay
-from mainapp.models.faculty import (
-    Para,
-    ParaTime,
-    Disciplines,
-    StudentGroupModel,
-    FacultyModel,
-    DepartmentModel)
+from mainapp.models.faculty import Para
 
 # import my own helper methods
 from ..utils.custom_utils import *
@@ -126,7 +101,7 @@ def userhelp(chat_id):
 
 
 def forgot_password(chat_id):
-    user_profile = ProfileModel.objects.filter(chat_id=chat_id)[0]
+    user_profile = ProfileModel.objects.filter(chat_id=chat_id)
     if user_profile:
         user = User.objects.filter(user__profilemodel=user_profile)[0]
     else:
