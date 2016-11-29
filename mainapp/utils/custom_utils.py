@@ -102,9 +102,19 @@ def custom_logger(data, user):
         f.write(str(user) + ':' + str(data))
 
 
+
 def generate_new_password():
     """
     :return: String that can be used as password for User object
     """
     new_password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(8))
     return new_password
+
+
+def create_response_scelet(status, message, data):
+    response = dict()
+    response['status'] = status
+    response['message'] = message
+    response['data']= data
+    return response
+
