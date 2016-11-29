@@ -174,7 +174,7 @@ class AddChatIdView(APIView):
         user = request.user
         input_chat_id = request.data['chat_id']
 
-        if user.is_active and not user.is_verified:
+        if user.is_active and not user.profilemodel.is_verified:
             if input_chat_id == user.profilemodel.chat_id:
                 user.profilemodel.is_verified = True
                 user.profilemodel.save()
