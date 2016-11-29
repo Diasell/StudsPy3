@@ -238,7 +238,7 @@ class EditProfileView(APIView):
                 pass
 
             try:
-                user.profilemodel.contact_phone = data['contact_phone']
+                user.profilemodel.contact_phone = prettify_phone(data['contact_phone'])
             except MultiValueDictKeyError:
                 pass
 
