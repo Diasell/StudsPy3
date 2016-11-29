@@ -63,11 +63,12 @@ class LoginAPIView(APIView):
                     result[key] = profile[key]
                 result['Authorization'] = "Token %s" % token
                 result['course'] = group_year(user.profilemodel.student_group.date_started)
-                return Response(result, status=status.HTTP_200_OK)
+                print(type(result))
+                response = create_response_scelet("success","User has been logged in", result)
+                return Response(response, status=status.HTTP_200_OK)
         else:
-            return Response({'status': 'failure',
-                             'message': 'Невірний номер телефону чи пароль'},
-                            status=status.HTTP_401_UNAUTHORIZED)
+            response = create_response_scelet('failure', 'Невірний номер телефону чи пароль', {})
+            return Response(response, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class RegisterAPIView(APIView):
@@ -99,43 +100,35 @@ class RegisterAPIView(APIView):
         )
         # validation user input
         if photo.size > (4096*1024):
-            return Response(
-                {'status': 'failure',
-                 'message': 'Розмір фото перевищує 4МБ'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            response = create_response_scelet('failure', 'Розмір фото перевищує 4МБ', {})
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
 
         try:
             is_valid_image(photo)
         except Exception:
-            return Response(
-                {'status': 'failure',
-                 'message': "Формат фото не підтримується"},
-                status=status.HTTP_403_FORBIDDEN)
+            response = create_response_scelet('failure', 'Формат фото не підтримується', {})
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
 
         if User.objects.filter(username=username):
-            return Response(
-                {'status': 'failure',
-                 'message': "Такий номер телефону вже зареєстрований"},
-                status=status.HTTP_403_FORBIDDEN)
+            response = create_response_scelet('failure', 'Такий номер телефону вже зареєстрований', {})
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
+
         if User.objects.filter(email=email):
-            return Response(
-                {'status': 'failure',
-                 'message': "Така адреса електронної пошти вже зареєстрована"},
-                status=status.HTTP_403_FORBIDDEN)
+            response = create_response_scelet('failure', 'Така адреса електронної пошти вже зареєстрована', {})
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
+
         if password != c_password:
-            return Response({'status': 'failure',
-                             'message': "Паролі не співпадають"},
-                            status=status.HTTP_403_FORBIDDEN)
+            response = create_response_scelet('failure', 'Паролі не співпадають', {})
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
+
         if not faculty:
-            return Response({'status': 'failure',
-                             'message': "Введеного факультету не існує"},
-                            status=status.HTTP_403_FORBIDDEN)
+            response = create_response_scelet('failure', 'Введеного факультету не існує', {})
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
+
         if not user_group:
-            return Response({
-                'status': 'failure',
-                'message': "Введена група не існує"},
-                status=status.HTTP_403_FORBIDDEN)
+            response = create_response_scelet('failure', 'Введена група не існує', {})
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
+
 
         serialized = UserSerializer(data=request.data).is_valid()
 
@@ -160,22 +153,16 @@ class RegisterAPIView(APIView):
                     photo=photo
                 )
                 new_user_profile.save()
+
                 token = Token.objects.get_or_create(user=new_user)[0]
-
-                response={}
                 data = {}
-                response['status'] = 'success'
-                data['message'] = 'user has been registered successfully'
                 data['Authorization'] = "Token %s" % token
-                response['data'] = data
 
+                response= create_response_scelet('success', 'user has been registered successfully', data)
                 return Response(response, status=status.HTTP_201_CREATED)
         else:
-            return Response({
-                'status': 'failure',
-                'message': 'Введені дані не пройшли валідацію'
-                },
-                status=status.HTTP_403_FORBIDDEN)
+            response = create_response_scelet('failure', 'Введені дані не пройшли валідацію', {})
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
 
 
 class AddChatIdView(APIView):
@@ -195,21 +182,20 @@ class AddChatIdView(APIView):
 
                 token = Token.objects.get_or_create(user=user)[0]
                 profile = ProfileSerializer(user.profilemodel).data
-                response = dict()
+                result = dict()
                 for key in profile:
-                    response[key] = profile[key]
-                response['Authorization'] = "Token %s" % token
-                response['course'] = group_year(user.profilemodel.student_group.date_started)
+                    result[key] = profile[key]
+                result['Authorization'] = "Token %s" % token
+                result['course'] = group_year(user.profilemodel.student_group.date_started)
+
+                response = create_response_scelet('success', 'Welcome to STUDS community', result)
                 return Response(response, status=status.HTTP_200_OK)
             else:
-                return Response({'status': 'failure',
-                                 'message': 'Невіринй код'},
-                                status=status.HTTP_403_FORBIDDEN)
-
+                response = create_response_scelet('failure', 'Невіринй код', {})
+                return Response(response, status=status.HTTP_401_UNAUTHORIZED)
         else:
-            return Response({'status': 'failure',
-                             'message': 'Не авторизована дія'},
-                            status=status.HTTP_401_UNAUTHORIZED)
+            response = create_response_scelet('failure', 'Не авторизована дія', {})
+            return Response(response, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class EditProfileView(APIView):
@@ -262,11 +248,11 @@ class EditProfileView(APIView):
             result = dict()
             for key in profile:
                 result[key] = profile[key]
-            return Response(result, status=status.HTTP_200_OK)
+            response = create_response_scelet('success', 'Data has been changed', result)
+            return Response(response, status=status.HTTP_200_OK)
         else:
-            return Response({'status': 'Unauthorized',
-                             'message': 'Не авторизовано'},
-                            status=status.HTTP_403_FORBIDDEN)
+            response = create_response_scelet('failure', 'Не авторизована дія', {})
+            return Response(response, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class ChangePasswordView(APIView):
@@ -276,65 +262,19 @@ class ChangePasswordView(APIView):
 
     def post(self, request):
         user = request.user
-        old_password = user.data['old_password']
-        new_password = user.data['new_password']
+        old_password = request.data['old_password']
+        new_password = request.data['new_password']
 
         if user.is_active:
             if user.check_password(old_password):
                 user.set_password(new_password)
                 user.save()
-                return Response({'status': 'Success',
-                                 'message': u'Пароль успішно змінено'},
-                                status=status.HTTP_200_OK)
+                response = create_response_scelet('success', 'Пароль успішно змінено', {})
+                return Response(response, status=status.HTTP_200_OK)
             else:
-                return Response({'status': 'failure',
-                                 'message': u'Старий пароль не вірний'},
-                                status=status.HTTP_401_UNAUTHORIZED)
+                response = create_response_scelet('failure', 'Старий пароль не вірний', {})
+                return Response(response, status=status.HTTP_401_UNAUTHORIZED)
         else:
-            return Response({'status': 'Unauthorized',
-                             'message': 'Не авторизовано'},
-                            status=status.HTTP_403_FORBIDDEN)
-
-
-# class ForgotPasswordView(APIView):
-#     authentication_classes = (AllowAny,)
-#     permission_classes = (AllowAny,)
-#     serializer_class = ForgotPasswordViewSerializer
-#
-#     def post(self, request):
-#         username = request.data['username']
-#
-#         user_filter = User.objects.filter(username=username)
-#
-#         if len(user_filter)>0:
-#             user = user_filter[0]
-#             if user.profilemodel.is_verified:
-#                 if user.is_active:
-#                     temp_password = generate_new_password()
-#                     user.set_password(temp_password)
-#                     user.save()
-#
-#                     message=u'Ваш новий пароль:\n' + temp_password
-#                     message1 = u"Ви можете змінити його в нашлаштуваннях вашого профілю"
-#                     STUDS_TELEGRAM_BOT.send_message(message + message1, user.profilemodel.chat_id)
-#
-#                     return Response({'status': 'Success',
-#                                      'message': 'Новий пароль був надісланий чат ботом'},
-#                                     status=status.HTTP_200_OK)
-#
-#                 else:
-#                     return Response({'status': 'Unauthorized',
-#                                      'message': 'Аккаунт не активний'},
-#                                     status=status.HTTP_403_FORBIDDEN)
-#             else:
-#                 return Response({'status': 'Unauthorized',
-#                                  'message': 'Аккаунт не пройшов верифікацію Telergam ботом'},
-#                                 status=status.HTTP_403_FORBIDDEN)
-#         else:
-#             return Response({'status': 'Unauthorized',
-#                              'message': 'Користувача з таким номером телефону не існує'},
-#                             status=status.HTTP_403_FORBIDDEN)
-
-
-
+            response = create_response_scelet('failure', 'Не авторизована дія', {})
+            return Response(response, status=status.HTTP_401_UNAUTHORIZED)
 
