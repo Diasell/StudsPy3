@@ -69,7 +69,8 @@ def get_schedule(chat_id):
                     result = ''
                     for i, para in enumerate(classes_for_today):
                         result += ParaSerializer(para).data['para_number'] + ' : ' \
-                                  + ParaSerializer(para).data['discipline'] + "\n"
+                                  + ParaSerializer(para).data['discipline'] \
+                                  +'('+ ParaSerializer(para).data['room'] + ')'  + "\n"
                     return result
                 else:
                     return "Жодної пари сьогодні! Здається у когось з'явився час на саморозвиток :)"
@@ -96,7 +97,7 @@ def add_chat_id(chat_id, phone_number):
     return response.encode('utf-8')
 
 
-def userhelp(chat_id):
+def userhelp():
     all_help = [
         "commands:\n",
         "/schedule\n",
@@ -144,7 +145,7 @@ def classmates(chat_id):
         return message
 
     else:
-        return "Жоден користувач в базі не зв'язаний із вашим аккаунтом в Telegram"
+        return "Жоден користувач в базі не пов'язаний із вашим аккаунтом в Telegram"
 
 COMMANDS = {
     '/help': userhelp,
@@ -168,6 +169,6 @@ class TelegramBotView(APIView):
             if user_command[0:3] == '380' and len(user_command) == 12:
                 req = STUDS_TELEGRAM_BOT.send_message(add_chat_id(chat_id, user_command), chat_id)
             else:
-                req = STUDS_TELEGRAM_BOT.send_message(userhelp(chat_id), chat_id)
+                req = STUDS_TELEGRAM_BOT.send_message(userhelp(), chat_id)
 
         return Response(req.json(), status=req.status_code)
