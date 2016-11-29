@@ -112,7 +112,7 @@ def forgot_password(chat_id):
         user.set_password(temp_password)
         user.save()
         message = u'Ваш новий пароль:\n' + temp_password
-        message1 = u"Ви можете змінити його в нашлаштуваннях вашого профілю"
+        message1 = '\nВи можете змінити його в нашлаштуваннях вашого профілю'
         return message + message1
     else:
         return "Жоден користувач в базі не зв'язаний із вашим аккаунтом в Telegram"
