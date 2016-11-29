@@ -118,3 +118,13 @@ def create_response_scelet(status, message, data):
     response['data']= data
     return response
 
+
+def prettify_phone(phonenumber):
+    """
+    make phone number more readable
+    :param phonenumber: 380988257176
+    :return: 38(098)-825-71-76
+    """
+    number = str(phonenumber)
+    return number[0:2] + '(' + number[2:5] + ')-' + number[5:8] + '-' + number[8:10] + '-' + number[10:]
+
