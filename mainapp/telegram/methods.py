@@ -97,11 +97,16 @@ def add_chat_id(chat_id, phone_number):
 
 
 def userhelp(chat_id):
-    line1 = "commands:"
-    line2 = "/schedule"
-    line3 = "/forgot_password"
-    line4 = "/classmates"
-    return "commands:\n/schedule" + '\n' + 'chat_id: ' + str(chat_id)
+    all_help = {
+        'line1': "commands:\n",
+        'line2' : "/schedule\n",
+        'line3' : "/forgot_password\n",
+        'line4' : "/classmates"
+    }
+    message = u""
+    for key in all_help:
+        message += all_help[key]
+    return message
 
 
 def forgot_password(chat_id):
