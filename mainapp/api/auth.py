@@ -56,16 +56,19 @@ class LoginAPIView(APIView):
         if account is not None:
             if account.is_active:
                 token = Token.objects.get_or_create(user=account)[0]
-                user = User.objects.get(username=username)
-                profile = ProfileSerializer(user.profilemodel).data
-                result = dict()
-                for key in profile:
-                    result[key] = profile[key]
-                result['Authorization'] = "Token %s" % token
-                result['course'] = group_year(user.profilemodel.student_group.date_started)
-                print(type(result))
-                response = create_response_scelet("success","User has been logged in", result)
-                return Response(response, status=status.HTTP_200_OK)
+                data = dict()
+                data['Authorization'] = "Token %s" % token
+                if account.profilemodel.is_verified:
+                    profile = ProfileSerializer(account.profilemodel).data
+
+                    for key in profile:
+                        data[key] = profile[key]
+                    data['course'] = group_year(account.profilemodel.student_group.date_started)
+                    response = create_response_scelet("success","User has been logged in", data)
+                    return Response(response, status=status.HTTP_200_OK)
+                else:
+                    response = create_response_scelet('success','User is not verified', data)
+                    return Response(response, status=status.HTTP_401_UNAUTHORIZED)
         else:
             response = create_response_scelet('failure', 'Невірний номер телефону чи пароль', {})
             return Response(response, status=status.HTTP_401_UNAUTHORIZED)
