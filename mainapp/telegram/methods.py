@@ -124,17 +124,21 @@ def get_tomorrow_schedule(chat_id):
 
 def add_chat_id(chat_id, phone_number):
     user = User.objects.filter(username=phone_number)
+    user2 = User.objects.filter(profilemodel__chat_id=chat_id)
 
-    if user:
-        if not user[0].profilemodel.is_verified:
-            user[0].profilemodel.chat_id = chat_id
-            user[0].profilemodel.save()
-            user[0].save()
-            response = 'Ваш код для реєстрації: ' + str(chat_id)
+    if not user2:
+        if user:
+            if not user[0].profilemodel.is_verified:
+                user[0].profilemodel.chat_id = chat_id
+                user[0].profilemodel.save()
+                user[0].save()
+                response = 'Ваш код для реєстрації: ' + str(chat_id)
+            else:
+                response = u'Введений вами аккаунт вже був успішно активований'
         else:
-            response = u'Введений вами аккаунт вже був успішно активований'
+            response = u'Аккаунта з таким номером телефону немає. Будь ласка перевірте номер'
     else:
-        response = u'Аккаунта з таким номером телефону немає. Будь ласка перевірте номер'
+        response = "Ваш Telegram аккаунт вже був зареєстрований в STUDS з номером: " + user2.profilemodel.contact_phone
 
     return response.encode('utf-8')
 
