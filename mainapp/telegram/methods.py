@@ -138,7 +138,8 @@ def add_chat_id(chat_id, phone_number):
         else:
             response = u'Аккаунта з таким номером телефону немає. Будь ласка перевірте номер'
     else:
-        response = "Ваш Telegram аккаунт вже був зареєстрований в STUDS з номером: " + user2.profilemodel.contact_phone
+        response = "Ваш Telegram аккаунт вже був зареєстрований в STUDS з номером: " \
+                   + str(user2[0].profilemodel.contact_phone)
 
     return response.encode('utf-8')
 
