@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import requests
-
+import google
 #  import django services
 from django.contrib.auth.models import User
 
@@ -144,6 +144,12 @@ def add_chat_id(chat_id, phone_number):
     return response.encode('utf-8')
 
 
+def google_it(user_query):
+    generator = google.search(user_query, lang='ua',stop=1)
+    response = 'ось що я зміг знайти:\n' + next(generator)
+    return response
+
+
 def userhelp():
     all_help = [
         "commands:\n",
@@ -218,6 +224,6 @@ class TelegramBotView(APIView):
             if user_command[0:3] == '380' and len(user_command) == 12:
                 req = STUDS_TELEGRAM_BOT.send_message(add_chat_id(chat_id, user_command), chat_id)
             else:
-                req = STUDS_TELEGRAM_BOT.send_message(userhelp(), chat_id)
+                req = STUDS_TELEGRAM_BOT.send_message(google_it(user_command), chat_id)
 
         return Response(req.json(), status=req.status_code)
