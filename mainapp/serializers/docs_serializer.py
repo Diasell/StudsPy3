@@ -4,7 +4,7 @@ from rest_framework.authtoken.models import Token
 
 from mainapp.models.userProfile import ProfileModel
 from mainapp.models.student import StudentJournalModel
-
+from mainapp.models.news import NewsItemModel
 
 class RegisterViewSerializer(serializers.ModelSerializer):
     """
@@ -75,6 +75,7 @@ class AddChatIDSerializer(serializers.ModelSerializer):
     Serializer for DRF DOCS for Add Chat ID Endpoint
     """
     chat_id = serializers.CharField(source='user_profilemodel.chat_id')
+
     class Meta:
         model = Token
         fields = (
@@ -150,7 +151,7 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Token
-        fields =(
+        fields = (
             'old_password',
             'new_password'
         )
@@ -164,4 +165,17 @@ class ForgotPasswordViewSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'username',
+        )
+
+
+class NewsContentSerializer(serializers.ModelSerializer):
+    """
+    Serializer for DRF DOCS to shows content
+    for the given news item
+    """
+
+    class Meta:
+        model = NewsItemModel
+        fields = (
+            'id',
         )

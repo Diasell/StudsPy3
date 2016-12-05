@@ -3,6 +3,7 @@ from mainapp.utils.custom_router import HybridRouter
 from mainapp.api import apiv1_methods as apiv1
 from mainapp.api import schedule
 from mainapp.api import auth
+from mainapp.api import news
 from mainapp.telegram import methods as tel_bot
 
 
@@ -10,6 +11,7 @@ router = HybridRouter()
 bot_router = HybridRouter()
 auth_router = HybridRouter()
 schedule_router = HybridRouter()
+news_router = HybridRouter()
 
 # APIViews:
 router.add_api_view("Show all the students for the given group",
@@ -58,3 +60,10 @@ schedule_router.add_api_view("User Schedule for current week",
 
 schedule_router.add_api_view("User Schedule for NEXT week",
                              url(r'^next_week/$', schedule.NextWeeklyScheduleView.as_view()))
+
+# NEWS:
+news_router.add_api_view("Get News List",
+                          url(r'list/$', news.NewsListView.as_view()))
+
+news_router.add_api_view("Get News Content",
+                         url(r'content/$', news.NewsContentView.as_view()))

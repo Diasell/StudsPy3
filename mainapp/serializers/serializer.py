@@ -4,6 +4,7 @@ from rest_framework import serializers
 from mainapp.models.userProfile import ProfileModel
 from mainapp.models.helpermodels import WorkingDay
 from mainapp.models.student import StudentJournalModel
+from mainapp.models.news import NewsItemModel
 from mainapp.models.faculty import (
     FacultyModel,
     DepartmentModel,
@@ -220,4 +221,27 @@ class ParaSerializer(serializers.ModelSerializer):
             'para_day',
             'para_group',
             'week_type'
+        )
+
+
+class NewsListSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = NewsItemModel
+        fields = (
+            'id',
+            'title',
+            'title_image',
+            'created'
+        )
+
+class NewsContentSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = NewsItemModel
+        fields = (
+            'id',
+            'title',
+            'title_image',
+            'content',
+            'updated',
+            'created'
         )

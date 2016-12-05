@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 
 from .models.student import StudentJournalModel
+from .models.news import NewsItemModel
 from .models.userProfile import ProfileModel
 from .models.helpermodels import StartSemester, WorkingDay
 from .models.faculty import (
@@ -13,6 +14,13 @@ from .models.faculty import (
     Para,
     ParaTime,
     Rooms)
+
+
+class NewsAdminModel(admin.ModelAdmin):
+    model = NewsItemModel
+    list_display = ['__str__', 'author', 'updated', 'created']
+    list_filter =  ['author']
+    search_fields = ['title', 'author__first_name', 'author__last_name', 'content']
 
 
 class ProfileModelInline(admin.StackedInline):
@@ -112,3 +120,4 @@ admin.site.register(Rooms, RoomsModelAdmin)
 admin.site.register(ParaTime, ParaTimeModelAdmin)
 admin.site.register(Para, ParaModelAdmin)
 admin.site.register(StartSemester, StartSemesterModelAdmin)
+admin.site.register(NewsItemModel, NewsAdminModel)
