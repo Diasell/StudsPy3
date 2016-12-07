@@ -52,7 +52,6 @@ class NewsContentView(APIView):
 
 class NewsListView(ListAPIView):
     authentication_classes = (IsAuthenticated,)
-    permission_classes = (IsAuthenticated,)
     pagination_class = PageNumberTPagination
     serializer_class = NewsListSerializer
 
