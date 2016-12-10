@@ -67,3 +67,6 @@ news_router.add_api_view("Get News List",
 
 news_router.add_api_view("Get News Content",
                          url(r'content/$', news.NewsContentView.as_view()))
+
+news_router.add_api_view("Like/DisLike News",
+                         url(r'like/$', news.LikeNewsView.as_view()))
