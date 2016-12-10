@@ -38,3 +38,16 @@ class NewsItemModel(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class LikeNewsModel(models.Model):
+
+    class Meta(object):
+        unique_together = (('user','news'),)
+
+    user = models.ForeignKey(User, blank=False)
+    news = models.ForeignKey(NewsItemModel, blank=False)
+    value = models.IntegerField(default=0, blank=False)
+
+    def __str__(self):
+        return str(self.value)
