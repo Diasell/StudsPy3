@@ -4,7 +4,7 @@ from rest_framework.authtoken.models import Token
 
 from mainapp.models.userProfile import ProfileModel
 from mainapp.models.student import StudentJournalModel
-from mainapp.models.news import NewsItemModel
+from mainapp.models.news import NewsItemModel, LikeCommentModel
 
 class RegisterViewSerializer(serializers.ModelSerializer):
     """
@@ -224,5 +224,17 @@ class CreateCommentSerializer(serializers.ModelSerializer):
             'news_id',
             'comment',
             'delete'
+        )
+
+class LikeCommentsSerializer(serializers.ModelSerializer):
+    "Like/Dislike comments"
+
+    comment_id = serializers.IntegerField(source='user_commentsmodel.id')
+
+    class Meta:
+        model = LikeCommentModel
+        fields = (
+            'value',
+            'comment_id'
         )
 

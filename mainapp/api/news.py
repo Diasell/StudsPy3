@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
-#  import django services
-from django.contrib.auth.models import User
-from django.utils.datastructures import MultiValueDictKeyError
 
 # import rest framework services
-from rest_framework.authtoken.models import Token
 from rest_framework.authentication import (
     TokenAuthentication,
     BasicAuthentication)
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
@@ -26,14 +21,16 @@ from mainapp.serializers.docs_serializer import (
     NewsContentSerializer as d_content,
     LikeNewsSerializer,
     CommentSerializer,
-    CreateCommentSerializer
+    CreateCommentSerializer,
+    LikeCommentsSerializer
 )
 
 # import needed app models
 from mainapp.models.news import (
     NewsItemModel,
     LikeNewsModel,
-    CommentsModel
+    CommentsModel,
+    LikeCommentModel
 )
 
 # import my own helper methods
@@ -90,7 +87,7 @@ class LikeNewsView(APIView):
             if created:
                 like.save()
                 serializer = NewsListSerializer(item[0])
-                response = create_response_scelet('success', 'got it', serializer.data)
+                response = create_response_scelet('success', 'created', serializer.data)
                 return Response(response, status=status.HTTP_201_CREATED)
             if not created:
                 like.value = int(value)
@@ -153,14 +150,13 @@ class CreateUpdateDeleteCommentView(APIView):
                         user=user,
                         news=news_item,
                         comment=comment
-
                     )
 
                     if created:
                         new_comment.save()
                         serializer = CommentViewSerializer(new_comment)
-                        response = create_response_scelet('success','comment created', serializer.data)
-                        return  Response(response, status=status.HTTP_201_CREATED)
+                        response = create_response_scelet('success', 'comment created', serializer.data)
+                        return Response(response, status=status.HTTP_201_CREATED)
                     else:
                         new_comment.comment = comment
                         new_comment.save()
@@ -196,4 +192,33 @@ class CreateUpdateDeleteCommentView(APIView):
             return Response(response, status=status.HTTP_401_UNAUTHORIZED)
 
 
+class LikeCommentsView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = LikeCommentsSerializer
 
+    def post(self, request):
+        user = request.user
+        comment_id = request.data['comment_id']
+        value = request.data['value']
+        item = CommentsModel.objects.filter(id=comment_id)
+        if item:
+            like, created = LikeCommentModel.objects.get_or_create(
+                user=user,
+                comment=item[0],
+                value=int(value)
+            )
+            if created:
+                like.save()
+                serializer = CommentViewSerializer(item[0])
+                response = create_response_scelet('success', 'created', serializer.data)
+                return Response(response, status=status.HTTP_201_CREATED)
+            if not created:
+                like.value = int(value)
+                like.save()
+                serializer = CommentViewSerializer(item[0])
+                response = create_response_scelet('success', 'changed', serializer.data)
+                return Response(response, status=status.HTTP_200_OK)
+        else:
+            response = create_response_scelet('failed', 'ID not found', {})
+            return Response(response, status=status.HTTP_404_NOT_FOUND)

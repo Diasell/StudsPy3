@@ -76,3 +76,6 @@ news_router.add_api_view('View Comments',
 
 news_router.add_api_view('Create/Update/Delete Comments',
                          url(r'updateComments/$', news.CreateUpdateDeleteCommentView.as_view()))
+
+news_router.add_api_view('Like Comments',
+                         url(r'likeComments/$', news.LikeCommentsView.as_view()))
