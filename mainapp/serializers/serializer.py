@@ -4,7 +4,7 @@ from rest_framework import serializers
 from mainapp.models.userProfile import ProfileModel
 from mainapp.models.helpermodels import WorkingDay
 from mainapp.models.student import StudentJournalModel
-from mainapp.models.news import NewsItemModel
+from mainapp.models.news import NewsItemModel, LikeNewsModel
 from mainapp.models.faculty import (
     FacultyModel,
     DepartmentModel,
@@ -234,6 +234,7 @@ class NewsListSerializer(serializers.ModelSerializer):
             'created'
         )
 
+
 class NewsContentSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = NewsItemModel
@@ -245,3 +246,51 @@ class NewsContentSerializer(serializers.ModelSerializer):
             'updated',
             'created'
         )
+
+
+class NewsContentSerializer(serializers.ModelSerializer):
+
+    likes = serializers.SerializerMethodField('get_news_likes')
+
+    class Meta(object):
+        model = NewsItemModel
+        fields = (
+            'id',
+            'title',
+            'title_image',
+            'content',
+            'updated',
+            'created',
+            'likes'
+        )
+
+    def get_news_likes(self, object):
+        result = 0
+        queryset = LikeNewsModel.objects.filter(news=object)
+        if queryset:
+            for item in queryset:
+                result += int(item.value)
+        return result
+
+
+class NewsListSerializer(serializers.ModelSerializer):
+
+    likes = serializers.SerializerMethodField('get_news_likes')
+
+    class Meta(object):
+        model = NewsItemModel
+        fields = (
+            'id',
+            'title',
+            'title_image',
+            'created',
+            'likes'
+        )
+
+    def get_news_likes(self, object):
+        result = 0
+        queryset = LikeNewsModel.objects.filter(news=object)
+        if queryset:
+            for item in queryset:
+                result += int(item.value)
+        return result

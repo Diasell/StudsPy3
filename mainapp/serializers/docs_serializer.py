@@ -179,3 +179,17 @@ class NewsContentSerializer(serializers.ModelSerializer):
         fields = (
             'id',
         )
+
+
+class LikeNewsSerializer(serializers.ModelSerializer):
+    """
+    Serializer for DRF DOCS to like\dislike given news item
+    """
+    value = serializers.IntegerField(source='user_likenews.value')
+
+    class Meta:
+        model = NewsItemModel
+        fields = (
+            'id',
+            'value'
+        )
