@@ -193,3 +193,36 @@ class LikeNewsSerializer(serializers.ModelSerializer):
             'id',
             'value'
         )
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """
+    Serializer for DRF DOCS to like\dislike given news item
+    """
+    news_id = serializers.IntegerField(source='user_newsitemmodel.id')
+
+    class Meta:
+        model = Token
+        fields = (
+            'news_id',
+        )
+
+class CreateCommentSerializer(serializers.ModelSerializer):
+    """
+    Create/Update/Delete Comments
+    """
+    comment_id = serializers.IntegerField(source='user_commentsmodel.id')
+    news_id = serializers.IntegerField(source='user_newsitemmodel.id')
+    comment = serializers.CharField(source='user_commentsmodel.comment')
+    delete =  serializers.BooleanField()
+
+
+    class Meta:
+        model = Token
+        fields = (
+            'comment_id',
+            'news_id',
+            'comment',
+            'delete'
+        )
+

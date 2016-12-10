@@ -43,10 +43,35 @@ class NewsItemModel(models.Model):
 class LikeNewsModel(models.Model):
 
     class Meta(object):
-        unique_together = (('user','news'),)
+        unique_together = (('user', 'news'),)
 
     user = models.ForeignKey(User, blank=False)
     news = models.ForeignKey(NewsItemModel, blank=False)
+    value = models.IntegerField(default=0, blank=False)
+
+    def __str__(self):
+        return str(self.value)
+
+
+class CommentsModel(models.Model):
+
+    user = models.ForeignKey(User, blank=False)
+    news = models.ForeignKey(NewsItemModel, blank=False)
+    comment = models.TextField(blank=False)
+    updated = models.DateTimeField(auto_now=True, auto_now_add=False, verbose_name=u"Змінено")
+    created = models.DateTimeField(auto_now=False, auto_now_add=True, verbose_name=u"Створено")
+
+    def __str__(self):
+        return self.user.get_full_name()
+
+
+class LikeCommentModel(models.Model):
+
+    class Meta(object):
+        unique_together = (('user', 'comment'),)
+
+    user = models.ForeignKey(User, blank=False)
+    comment = models.ForeignKey(CommentsModel, blank=False)
     value = models.IntegerField(default=0, blank=False)
 
     def __str__(self):

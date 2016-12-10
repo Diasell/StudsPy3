@@ -4,7 +4,12 @@ from rest_framework import serializers
 from mainapp.models.userProfile import ProfileModel
 from mainapp.models.helpermodels import WorkingDay
 from mainapp.models.student import StudentJournalModel
-from mainapp.models.news import NewsItemModel, LikeNewsModel
+from mainapp.models.news import (
+    NewsItemModel,
+    LikeNewsModel,
+    CommentsModel,
+    LikeCommentModel
+)
 from mainapp.models.faculty import (
     FacultyModel,
     DepartmentModel,
@@ -290,6 +295,32 @@ class NewsListSerializer(serializers.ModelSerializer):
     def get_news_likes(self, object):
         result = 0
         queryset = LikeNewsModel.objects.filter(news=object)
+        if queryset:
+            for item in queryset:
+                result += int(item.value)
+        return result
+
+
+class CommentViewSerializer(serializers.ModelSerializer):
+
+    likes = serializers.SerializerMethodField('get_comment_likes')
+    full_name = serializers.CharField(source='user.get_full_name')
+
+    class Meta(object):
+        model = CommentsModel
+        fields = (
+            'id',
+            'full_name',
+            'news',
+            'comment',
+            'created',
+            'likes'
+        )
+
+
+    def get_comment_likes(self, object):
+        result = 0
+        queryset = LikeCommentModel.objects.filter(comment=object)
         if queryset:
             for item in queryset:
                 result += int(item.value)
