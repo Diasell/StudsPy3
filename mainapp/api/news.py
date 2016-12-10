@@ -21,7 +21,7 @@ from mainapp.serializers.serializer import (
     NewsContentSerializer)
 from mainapp.serializers.docs_serializer import (
     NewsContentSerializer as d_content,
-
+    LikeNewsSerializer
 )
 
 # import needed app models
