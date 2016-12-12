@@ -79,22 +79,27 @@ class LikeNewsView(APIView):
         value = request.data['value']
         item = NewsItemModel.objects.filter(id=news_id)
         if item:
-            like, created = LikeNewsModel.objects.get_or_create(
+            like = LikeNewsModel.objects.filter(
                 user=user,
-                news=item[0],
-                value=int(value)
+                news=item[0]
             )
-            if created:
-                like.save()
-                serializer = NewsListSerializer(item[0])
-                response = create_response_scelet('success', 'created', serializer.data)
-                return Response(response, status=status.HTTP_201_CREATED)
-            if not created:
-                like.value = int(value)
-                like.save()
+
+            if like:
+                like[0].value = int(value)
+                like[0].save()
                 serializer = NewsListSerializer(item[0])
                 response = create_response_scelet('success', 'changed', serializer.data)
                 return Response(response, status=status.HTTP_200_OK)
+            if not like:
+                new_like = LikeNewsView.objects.create(
+                    user=user,
+                    news=item[0],
+                    value=int(value)
+                )
+                new_like.save()
+                serializer = NewsListSerializer(item[0])
+                response = create_response_scelet('success', 'created', serializer.data)
+                return Response(response, status=status.HTTP_201_CREATED)
         else:
             response = create_response_scelet('failed', 'ID not found', {})
             return Response(response, status=status.HTTP_404_NOT_FOUND)
@@ -203,19 +208,24 @@ class LikeCommentsView(APIView):
         value = request.data['value']
         item = CommentsModel.objects.filter(id=comment_id)
         if item:
-            like, created = LikeCommentModel.objects.get_or_create(
+            like= LikeCommentModel.objects.filter(
                 user=user,
                 comment=item[0],
-                value=int(value)
             )
-            if created:
-                like.save()
+
+            if not like:
+                new_like = LikeCommentModel.objects.create(
+                    user=user,
+                    comment=item[0],
+                    value=int(value)
+                )
+                new_like.save()
                 serializer = CommentViewSerializer(item[0])
                 response = create_response_scelet('success', 'created', serializer.data)
                 return Response(response, status=status.HTTP_201_CREATED)
-            if not created:
-                like.value = int(value)
-                like.save()
+            if like:
+                like[0].value = int(value)
+                like[0].save()
                 serializer = CommentViewSerializer(item[0])
                 response = create_response_scelet('success', 'changed', serializer.data)
                 return Response(response, status=status.HTTP_200_OK)
