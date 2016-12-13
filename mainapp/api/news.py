@@ -16,7 +16,7 @@ from mainapp.serializers.serializer import (
 )
 # import Serializers For DOCS
 from mainapp.serializers.docs_serializer import (
-    NewsContentSerializer,
+    NewsContentSerializerD,
     LikeNewsSerializer,
     CommentSerializer,
     CreateCommentSerializer,
@@ -41,7 +41,7 @@ from ..utils.pagination import PageNumberTPagination
 class NewsContentView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    serializer_class = NewsContentSerializer
+    serializer_class = NewsContentSerializerD
 
     def post(self, request, format=None):
         news_id = request.data['id']
@@ -66,6 +66,9 @@ class NewsListView(ListAPIView):
     def get_queryset(self, *args, **kwargs):
         queryset = NewsItemModel.objects.all().order_by('-created')
         return queryset
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
 
 class LikeNewsView(APIView):

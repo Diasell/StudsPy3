@@ -170,7 +170,7 @@ class ForgotPasswordViewSerializer(serializers.ModelSerializer):
         )
 
 
-class NewsContentSerializer(serializers.ModelSerializer):
+class NewsContentSerializerD(serializers.ModelSerializer):
     """
     Serializer for DRF DOCS to shows content
     for the given news item
