@@ -283,11 +283,18 @@ class NewsListSerializer(serializers.ModelSerializer):
         )
 
     def get_news_likes(self, object):
-        result = 0
+        total = 0
+        likes = 0
+        dislikes = 0
         queryset = LikeNewsModel.objects.filter(news=object)
         if queryset:
             for item in queryset:
-                result += int(item.value)
+                total += int(item.value)
+                if item.value == 1:
+                    likes += int(item.value)
+                elif item.value == -1:
+                    dislikes += int(item.value)
+        result = {'total': total, 'likes': likes, 'dislikes': dislikes}
         return result
 
     def get_user_like(self, object):
