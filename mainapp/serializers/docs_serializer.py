@@ -6,6 +6,7 @@ from mainapp.models.userProfile import ProfileModel
 from mainapp.models.student import StudentJournalModel
 from mainapp.models.news import NewsItemModel, LikeCommentModel
 
+
 class RegisterViewSerializer(serializers.ModelSerializer):
     """
     Serializer for DRF DOCS for REGISTRATION EndPoint
@@ -113,6 +114,7 @@ class GroupStudentsSerializer(serializers.ModelSerializer):
     Serializer for DRF DOCS to show all the students
     for the given group
     """
+
     group = serializers.CharField(source='user_student_group.title')
 
     class Meta:
@@ -207,27 +209,54 @@ class CommentSerializer(serializers.ModelSerializer):
             'news_id',
         )
 
+
 class CreateCommentSerializer(serializers.ModelSerializer):
     """
-    Create/Update/Delete Comments
+    Create Comments
+    """
+    news_id = serializers.IntegerField(source='user_newsitemmodel.id')
+    text = serializers.CharField(source='user_commentsmodel.comment')
+
+    class Meta:
+        model = Token
+        fields = (
+            'news_id',
+            'text',
+        )
+
+
+class UpdateCommentSerializer(serializers.ModelSerializer):
+    """
+    Update Comments
     """
     comment_id = serializers.IntegerField(source='user_commentsmodel.id')
-    news_id = serializers.IntegerField(source='user_newsitemmodel.id')
-    comment = serializers.CharField(source='user_commentsmodel.comment')
-    delete =  serializers.BooleanField()
-
+    edited_text = serializers.CharField(source='user_commentsmodel.comment')
 
     class Meta:
         model = Token
         fields = (
             'comment_id',
-            'news_id',
-            'comment',
-            'delete'
+            'edited_text',
         )
 
+
+class DeleteCommentSerializer(serializers.ModelSerializer):
+    """
+    Delete Comments
+    """
+    comment_id = serializers.IntegerField(source='user_commentsmodel.id')
+
+    class Meta:
+        model = Token
+        fields = (
+            'comment_id',
+        )
+
+
 class LikeCommentsSerializer(serializers.ModelSerializer):
-    "Like/Dislike comments"
+    """
+    Like/Dislike comments
+    """
 
     comment_id = serializers.IntegerField(source='user_commentsmodel.id')
 
@@ -237,4 +266,3 @@ class LikeCommentsSerializer(serializers.ModelSerializer):
             'value',
             'comment_id'
         )
-

@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 # import rest framework services
-from rest_framework.authentication import (
-    TokenAuthentication,
-    BasicAuthentication)
+from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
@@ -18,11 +16,13 @@ from mainapp.serializers.serializer import (
 )
 # import Serializers For DOCS
 from mainapp.serializers.docs_serializer import (
-    NewsContentSerializer as d_content,
+    NewsContentSerializer,
     LikeNewsSerializer,
     CommentSerializer,
     CreateCommentSerializer,
-    LikeCommentsSerializer
+    UpdateCommentSerializer,
+    LikeCommentsSerializer,
+    DeleteCommentSerializer
 )
 
 # import needed app models
@@ -41,7 +41,7 @@ from ..utils.pagination import PageNumberTPagination
 class NewsContentView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    serializer_class = d_content
+    serializer_class = NewsContentSerializer
 
     def post(self, request, format=None):
         news_id = request.data['id']
@@ -91,7 +91,7 @@ class LikeNewsView(APIView):
                 response = create_response_scelet('success', 'changed', serializer.data)
                 return Response(response, status=status.HTTP_200_OK)
             if not like:
-                new_like = LikeNewsView.objects.create(
+                new_like = LikeNewsModel.objects.create(
                     user=user,
                     news=item[0],
                     value=int(value)
@@ -131,7 +131,7 @@ class CommentsView(APIView):
             return Response(response, status=status.HTTP_404_NOT_FOUND)
 
 
-class CreateUpdateDeleteCommentView(APIView):
+class CreateCommentView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = CreateCommentSerializer
@@ -139,62 +139,85 @@ class CreateUpdateDeleteCommentView(APIView):
     def post(self, request):
         user = request.user
         news_id = request.data['news_id']
-        comment = request.data['comment']
-        comment_id = request.data['comment_id']
-        delete = request.data['delete']
+        comment = request.data['text']
 
         if user.is_active and user.profilemodel.is_verified:
             news = NewsItemModel.objects.filter(id=news_id)
 
             if news:
                 news_item = news[0]
+                new_comment = CommentsModel.objects.create(
+                    user=user,
+                    news=news_item,
+                    comment=comment
+                )
 
-                if not delete:
-                    new_comment, created = CommentsModel.objects.get_or_create(
-                        id=comment_id,
-                        user=user,
-                        news=news_item,
-                        comment=comment
-                    )
-
-                    if created:
-                        new_comment.save()
-                        serializer = CommentViewSerializer(new_comment)
-                        response = create_response_scelet('success', 'comment created', serializer.data)
-                        return Response(response, status=status.HTTP_201_CREATED)
-                    else:
-                        new_comment.comment = comment
-                        new_comment.save()
-                        serializer = CommentViewSerializer(new_comment)
-                        response = create_response_scelet('success', 'comment updated', serializer.data)
-                        return Response(response, status=status.HTTP_200_OK)
-
-                if delete:
-                    item = CommentsModel.objects.filter(
-                        id=comment_id,
-                        user=user,
-                        news=news_item
-                    )
-                    if item:
-                        item.delete()
-                        comments = CommentsModel.objects.filter(news=news_item)
-
-                        data = []
-                        if comments:
-                            for comment in comments:
-                                data.append(CommentViewSerializer(comment).data)
-
-                        response = create_response_scelet('success', 'comment deleted', data)
-                        return Response(response, status=status.HTTP_200_OK)
-                    else:
-                        response = create_response_scelet('failed', 'Comment ID not found', {})
-                        return Response(response, status=status.HTTP_404_NOT_FOUND)
+                new_comment.save()
+                serializer = CommentViewSerializer(new_comment)
+                response = create_response_scelet('success', 'comment created', serializer.data)
+                return Response(response, status=status.HTTP_201_CREATED)
             else:
                 response = create_response_scelet('failed', 'ID not found', {})
                 return Response(response, status=status.HTTP_404_NOT_FOUND)
         else:
             response = create_response_scelet('failed', 'Not authorized', {})
             return Response(response, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class UpdateCommentView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UpdateCommentSerializer
+
+    def post(self, request):
+        user = request.user
+        comment_id = request.data['comment_id']
+        edited_text = request.data['edited_text']
+
+        if user.is_active and user.profilemodel.is_verified:
+            comments = CommentsModel.objects.filter(id=comment_id)
+
+            if comments:
+                comment = comments[0]
+                comment.comment = edited_text
+                comment.save()
+
+                serializer = CommentViewSerializer(comment)
+                response = create_response_scelet('success', 'comment has been edited', serializer.data)
+                return Response(response, status=status.HTTP_200_OK)
+            else:
+                response = create_response_scelet('failed', 'comment not found', {})
+                return Response(response, status=status.HTTP_404_NOT_FOUND)
+        else:
+            response = create_response_scelet('failed', 'Not authorized', {})
+            return Response(response, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class DeleteCommentView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = DeleteCommentSerializer
+
+    def delete(self, request):
+        user = request.user
+        comment_id = request.data['comment_id']
+
+        item = CommentsModel.objects.filter(id=comment_id, user=user)
+        if item:
+            news = item[0].news
+            item[0].delete()
+            comments = CommentsModel.objects.filter(news=news)
+
+            data = []
+            if comments:
+                for comment in comments:
+                    data.append(CommentViewSerializer(comment).data)
+
+            response = create_response_scelet('success', 'comment deleted', data)
+            return Response(response, status=status.HTTP_200_OK)
+        else:
+            response = create_response_scelet('failed', 'Comment ID not found', {})
+            return Response(response, status=status.HTTP_404_NOT_FOUND)
 
 
 class LikeCommentsView(APIView):
@@ -208,7 +231,7 @@ class LikeCommentsView(APIView):
         value = request.data['value']
         item = CommentsModel.objects.filter(id=comment_id)
         if item:
-            like= LikeCommentModel.objects.filter(
+            like = LikeCommentModel.objects.filter(
                 user=user,
                 comment=item[0],
             )
