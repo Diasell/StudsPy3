@@ -78,19 +78,17 @@ class LikeNewsView(APIView):
 
     def post(self, request):
         user = request.user
+        context = {'request': request}
         news_id = request.data['id']
         value = request.data['value']
         item = NewsItemModel.objects.filter(id=news_id)
         if item:
-            like = LikeNewsModel.objects.filter(
-                user=user,
-                news=item[0]
-            )
+            like = LikeNewsModel.objects.filter(user=user, news=item[0])
 
             if like:
                 like[0].value = int(value)
                 like[0].save()
-                serializer = NewsListSerializer(item[0])
+                serializer = NewsListSerializer(item[0], context=context)
                 response = create_response_scelet('success', 'changed', serializer.data)
                 return Response(response, status=status.HTTP_200_OK)
             if not like:
@@ -100,7 +98,7 @@ class LikeNewsView(APIView):
                     value=int(value)
                 )
                 new_like.save()
-                serializer = NewsListSerializer(item[0])
+                serializer = NewsListSerializer(item[0], context=context)
                 response = create_response_scelet('success', 'created', serializer.data)
                 return Response(response, status=status.HTTP_201_CREATED)
         else:

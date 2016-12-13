@@ -240,18 +240,6 @@ class NewsListSerializer(serializers.ModelSerializer):
         )
 
 
-class NewsContentSerializer(serializers.ModelSerializer):
-    class Meta(object):
-        model = NewsItemModel
-        fields = (
-            'id',
-            'title',
-            'title_image',
-            'content',
-            'updated',
-            'created'
-        )
-
 
 class NewsContentSerializer(serializers.ModelSerializer):
 
@@ -281,6 +269,7 @@ class NewsContentSerializer(serializers.ModelSerializer):
 class NewsListSerializer(serializers.ModelSerializer):
 
     likes = serializers.SerializerMethodField('get_news_likes')
+    user_like = serializers.SerializerMethodField()
 
     class Meta(object):
         model = NewsItemModel
@@ -289,7 +278,8 @@ class NewsListSerializer(serializers.ModelSerializer):
             'title',
             'title_image',
             'created',
-            'likes'
+            'likes',
+            'user_like'
         )
 
     def get_news_likes(self, object):
@@ -299,6 +289,15 @@ class NewsListSerializer(serializers.ModelSerializer):
             for item in queryset:
                 result += int(item.value)
         return result
+
+    def get_user_like(self, object):
+        try:
+            user = self.context['request'].user
+            like = LikeNewsModel.objects.filter(news=object, user=user)
+            if like:
+                return like[0].value
+        except KeyError:
+            return None
 
 
 class CommentViewSerializer(serializers.ModelSerializer):
