@@ -230,43 +230,6 @@ class ParaSerializer(serializers.ModelSerializer):
 
 
 class NewsListSerializer(serializers.ModelSerializer):
-    class Meta(object):
-        model = NewsItemModel
-        fields = (
-            'id',
-            'title',
-            'title_image',
-            'created'
-        )
-
-
-
-class NewsContentSerializer(serializers.ModelSerializer):
-
-    likes = serializers.SerializerMethodField('get_news_likes')
-
-    class Meta(object):
-        model = NewsItemModel
-        fields = (
-            'id',
-            'title',
-            'title_image',
-            'content',
-            'updated',
-            'created',
-            'likes'
-        )
-
-    def get_news_likes(self, object):
-        result = 0
-        queryset = LikeNewsModel.objects.filter(news=object)
-        if queryset:
-            for item in queryset:
-                result += int(item.value)
-        return result
-
-
-class NewsListSerializer(serializers.ModelSerializer):
 
     likes = serializers.SerializerMethodField('get_news_likes')
     user_like = serializers.SerializerMethodField()
@@ -278,6 +241,7 @@ class NewsListSerializer(serializers.ModelSerializer):
             'title',
             'title_image',
             'created',
+            'content',
             'likes',
             'user_like'
         )

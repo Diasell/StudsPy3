@@ -11,7 +11,6 @@ from rest_framework.generics import ListAPIView
 # import db models serializers
 from mainapp.serializers.serializer import (
     NewsListSerializer,
-    NewsContentSerializer,
     CommentViewSerializer
 )
 # import Serializers For DOCS
@@ -49,7 +48,7 @@ class NewsContentView(APIView):
         item = NewsItemModel.objects.filter(id=news_id)
 
         if item:
-            data = NewsContentSerializer(item[0]).data
+            data = NewsListSerializer(item[0]).data
             response = create_response_scelet('success', 'Content message', data)
             return Response(response, status=status.HTTP_200_OK)
         else:
@@ -86,7 +85,10 @@ class LikeNewsView(APIView):
             like = LikeNewsModel.objects.filter(user=user, news=item[0])
 
             if like:
-                like[0].value = int(value)
+                if like[0].value == int(value):
+                    like[0].value = 0
+                else:
+                    like[0].value = int(value)
                 like[0].save()
                 serializer = NewsListSerializer(item[0], context=context)
                 response = create_response_scelet('success', 'changed', serializer.data)
