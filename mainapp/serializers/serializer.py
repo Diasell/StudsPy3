@@ -279,18 +279,20 @@ class NewsListSerializer(serializers.ModelSerializer):
             for item in queryset:
                 total += 1
         return total
-    
+
 
 class CommentViewSerializer(serializers.ModelSerializer):
 
     likes = serializers.SerializerMethodField('get_comment_likes')
     full_name = serializers.CharField(source='user.get_full_name')
+    photo = serializers.ImageField(source='user.profilemodel.photo')
 
     class Meta(object):
         model = CommentsModel
         fields = (
             'id',
             'full_name',
+            'photo',
             'news',
             'comment',
             'created',
