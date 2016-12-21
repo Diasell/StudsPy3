@@ -144,7 +144,7 @@ class CreateCommentView(APIView):
         news_id = request.data['news_id']
         comment = request.data['text']
 
-        if user.is_active and user.profilemodel.is_verified:
+        if user.is_active:
             news = NewsItemModel.objects.filter(id=news_id)
 
             if news:

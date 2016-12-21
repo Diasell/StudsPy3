@@ -233,6 +233,7 @@ class NewsListSerializer(serializers.ModelSerializer):
 
     likes = serializers.SerializerMethodField('get_news_likes')
     user_like = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
 
     class Meta(object):
         model = NewsItemModel
@@ -243,7 +244,8 @@ class NewsListSerializer(serializers.ModelSerializer):
             'created',
             'content',
             'likes',
-            'user_like'
+            'user_like',
+            'comment_count'
         )
 
     def get_news_likes(self, object):
@@ -270,6 +272,14 @@ class NewsListSerializer(serializers.ModelSerializer):
         except KeyError:
             return None
 
+    def get_comment_count(self, object):
+        total = 0
+        queryset = CommentsModel.objects.filter(news=object)
+        if queryset:
+            for item in queryset:
+                total += 1
+        return total
+    
 
 class CommentViewSerializer(serializers.ModelSerializer):
 
