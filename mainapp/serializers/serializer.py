@@ -269,8 +269,10 @@ class NewsListSerializer(serializers.ModelSerializer):
             like = LikeNewsModel.objects.filter(news=object, user=user)
             if like:
                 return like[0].value
+            else:
+                return 0
         except KeyError:
-            return None
+            return 0
 
     def get_comment_count(self, object):
         total = 0
