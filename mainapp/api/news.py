@@ -56,7 +56,6 @@ class NewsContentView(APIView):
             return Response(response, status=status.HTTP_404_NOT_FOUND)
 
 
-
 class NewsListView(ListAPIView):
     authentication_classes = (TokenAuthentication,)
     pagination_class = PageNumberTPagination
@@ -149,15 +148,16 @@ class CreateCommentView(APIView):
 
             if news:
                 news_item = news[0]
-                new_comment = CommentsModel.objects.create(
-                    user=user,
-                    news=news_item,
-                    comment=comment
-                )
-
+                new_comment = CommentsModel.objects.create(user=user, news=news_item, comment=comment)
                 new_comment.save()
-                serializer = CommentViewSerializer(new_comment)
-                response = create_response_scelet('success', 'comment created', serializer.data)
+
+                comments = CommentsModel.objects.filter(news=news_item)
+
+                data = []
+                for comment in comments:
+                    data.append(CommentViewSerializer(comment).data)
+
+                response = create_response_scelet('success', 'comment created', data)
                 return Response(response, status=status.HTTP_201_CREATED)
             else:
                 response = create_response_scelet('failed', 'ID not found', {})
