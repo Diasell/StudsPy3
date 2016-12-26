@@ -182,12 +182,21 @@ class UpdateCommentView(APIView):
 
             if comments:
                 comment = comments[0]
-                comment.comment = edited_text
-                comment.save()
+                if comment.user == user:
+                    comment.comment = edited_text
+                    comment.save()
 
-                serializer = CommentViewSerializer(comment)
-                response = create_response_scelet('success', 'comment has been edited', serializer.data)
-                return Response(response, status=status.HTTP_200_OK)
+                    all_comments = CommentsModel.objects.filter(news=comment.news)
+
+                    data = []
+                    for item in all_comments:
+                        data.append(CommentViewSerializer(item).data)
+
+                    response = create_response_scelet('success', 'comment has been edited', data)
+                    return Response(response, status=status.HTTP_200_OK)
+                else:
+                    response = create_response_scelet('failed', 'Not authorized', {})
+                    return Response(response, status=status.HTTP_401_UNAUTHORIZED)
             else:
                 response = create_response_scelet('failed', 'comment not found', {})
                 return Response(response, status=status.HTTP_404_NOT_FOUND)
